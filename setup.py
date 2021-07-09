@@ -34,22 +34,22 @@ version = "0.1.0"
 
 setup(
     name="Placement-Explorer",
-    description=("A tool to visualize state of available and used resources for a cloud"),
+    description=(
+        "A tool to visualize state of available and used resources for a cloud"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     version=version,
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    entry_points={"console_scripts": ["placement-explorer=placement_explorer.cli:main"]},
-    install_requires=[
-        "flask"
-    ],
+    entry_points={
+        "console_scripts": ["placement-explorer=placement_explorer.cli:main"]
+    },
+    install_requires=["flask"],
     python_requires="~=3.8",
     author="Andrey Volkov",
     author_email="m@amadev.ru",
     url="https://github.com/amadev/placement-explorer/",
-    classifiers=[
-        "Programming Language :: Python :: 3.9",
-    ],
+    classifiers=["Programming Language :: Python :: 3.9",],
 )

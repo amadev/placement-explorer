@@ -1,3 +1,2 @@
 def collect():
-    return {"version": "",
-            "resources": ""}
+    return {"version": "", "resources": ""}
