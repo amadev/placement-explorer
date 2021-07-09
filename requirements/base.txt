@@ -7,15 +7,141 @@
 #
 -e file:.
     # via -r requirements/base.in
+appdirs==1.4.4
+    # via openstacksdk
+attrs==21.2.0
+    # via jsonschema
+bravado==11.0.3
+    # via os-sdk-light
+bravado-core==5.17.0
+    # via bravado
+certifi==2021.5.30
+    # via requests
+cffi==1.14.6
+    # via cryptography
+chardet==4.0.0
+    # via requests
 click==8.0.1
     # via flask
+cryptography==3.4.7
+    # via openstacksdk
+decorator==5.0.9
+    # via
+    #   dogpile.cache
+    #   openstacksdk
+dogpile.cache==1.1.3
+    # via openstacksdk
 flask==2.0.1
     # via placement-explorer
+idna==2.10
+    # via
+    #   jsonschema
+    #   requests
+iso8601==0.1.14
+    # via
+    #   keystoneauth1
+    #   openstacksdk
 itsdangerous==2.0.1
     # via flask
 jinja2==3.0.1
     # via flask
+jmespath==0.10.0
+    # via openstacksdk
+jsonpatch==1.32
+    # via openstacksdk
+jsonpointer==2.1
+    # via
+    #   jsonpatch
+    #   jsonschema
+jsonref==0.2
+    # via bravado-core
+jsonschema[format]==3.2.0
+    # via
+    #   bravado-core
+    #   swagger-spec-validator
+keystoneauth1==4.3.1
+    # via openstacksdk
 markupsafe==2.0.1
     # via jinja2
+monotonic==1.6
+    # via bravado
+msgpack==1.0.2
+    # via
+    #   bravado
+    #   bravado-core
+munch==2.5.0
+    # via openstacksdk
+netifaces==0.11.0
+    # via openstacksdk
+openstacksdk==0.57.0
+    # via os-client-config
+os-client-config==2.1.0
+    # via os-sdk-light
+os-sdk-light==0.2.5
+    # via placement-explorer
+os-service-types==1.7.0
+    # via
+    #   keystoneauth1
+    #   openstacksdk
+pbr==5.6.0
+    # via
+    #   keystoneauth1
+    #   openstacksdk
+    #   os-service-types
+    #   stevedore
+pycparser==2.20
+    # via cffi
+pyrsistent==0.18.0
+    # via jsonschema
+python-dateutil==2.8.1
+    # via
+    #   bravado
+    #   bravado-core
+pytz==2021.1
+    # via bravado-core
+pyyaml==5.4.1
+    # via
+    #   bravado
+    #   bravado-core
+    #   openstacksdk
+    #   swagger-spec-validator
+requests==2.25.1
+    # via
+    #   bravado
+    #   keystoneauth1
+requestsexceptions==1.4.0
+    # via openstacksdk
+rfc3987==1.3.8
+    # via jsonschema
+simplejson==3.17.3
+    # via
+    #   bravado
+    #   bravado-core
+six==1.16.0
+    # via
+    #   bravado
+    #   bravado-core
+    #   jsonschema
+    #   keystoneauth1
+    #   munch
+    #   python-dateutil
+    #   swagger-spec-validator
+stevedore==3.3.0
+    # via
+    #   dogpile.cache
+    #   keystoneauth1
+strict-rfc3339==0.7
+    # via jsonschema
+swagger-spec-validator==2.7.3
+    # via bravado-core
+typing-extensions==3.10.0.0
+    # via bravado
+urllib3==1.26.6
+    # via requests
+webcolors==1.11.1
+    # via jsonschema
 werkzeug==2.0.1
     # via flask
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

@@ -19,7 +19,7 @@ filelock==3.0.12
     # via
     #   tox
     #   virtualenv
-identify==2.2.10
+identify==2.2.11
     # via pre-commit
 nodeenv==1.6.0
     # via pre-commit

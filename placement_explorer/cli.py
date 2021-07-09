@@ -1,4 +1,9 @@
+import pprint
+import sys
+
 import click
+
+import placement_explorer.resource
 
 
 @click.group()
@@ -8,4 +13,7 @@ def main():
 
 @main.command()
 def resource():
-    print("placement-explorer: ok")
+    result = placement_explorer.resource.collect()
+    pprint.pprint(result)
+    if "error" in result:
+        sys.exit(1)

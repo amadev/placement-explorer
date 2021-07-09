@@ -10,14 +10,8 @@
     # via -r requirements/base.in
 astroid==2.6.2
     # via pylint
-attrs==21.2.0
-    # via pytest
 backcall==0.2.0
     # via ipython
-decorator==5.0.9
-    # via
-    #   ipdb
-    #   ipython
 iniconfig==1.1.1
     # via pytest
 ipdb==0.13.9
