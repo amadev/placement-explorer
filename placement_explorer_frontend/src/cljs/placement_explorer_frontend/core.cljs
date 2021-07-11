@@ -5,7 +5,8 @@
    [reagent.session :as session]
    [reitit.frontend :as reitit]
    [clerk.core :as clerk]
-   [accountant.core :as accountant]))
+   [accountant.core :as accountant]
+   [datascript.core :as d]))
 
 ;; -------------------------
 ;; Routes
@@ -23,6 +24,36 @@
     (:path (reitit/match-by-name router route params))
     (:path (reitit/match-by-name router route))))
 
+(defn get-data []
+  (def conn (d/create-conn))
+  (def datoms [{:db/id -1
+                :node/name "dev01"
+                :memory_mb/total 7976
+                :memory_mb/used 768
+                :disk_gb/total 4
+                :disk_gb/used 2
+                :vcpu/total 4
+                :vcpu/used 2
+                :cloud/name "devstack"}
+               {:db/id -2
+                :node/name "dev02"
+                :memory_mb/total 7976
+                :memory_mb/used 768
+                :disk_gb/total 4
+                :disk_gb/used 2
+                :vcpu/total 4
+                :vcpu/used 2
+                :cloud/name "devstack"}
+               ])
+  (d/transact! conn datoms)
+  (def query '[:find ?n ?c ?m
+               :where
+               [?e :node/name ?n]
+               [?e :memory_mb/total ?m]
+               [?e :vcpu/total ?c]
+               ])
+  (d/q query @conn))
+
 ;; -------------------------
 ;; Page components
 
@@ -30,6 +61,8 @@
   (fn []
     [:span.main
      [:h1 "Welcome to Placement-Explorer"]
+     [:h2 "Results:"]
+     [:pre (with-out-str (cljs.pprint/pprint (get-data)))]
      [:ul
       [:li [:a {:href (path-for :items)} "Items of Placement-Explorer"]]
       [:li [:a {:href "/broken/link"} "Broken link"]]]]))
