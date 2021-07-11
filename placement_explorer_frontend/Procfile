@@ -1,0 +1,1 @@
+web: java $JVM_OPTS -cp target/placement_explorer_frontend.jar clojure.main -m placement-explorer-frontend.server
