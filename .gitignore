@@ -1,0 +1,9 @@
+*.ipynb
+*.bak
+*.db
+*.pyc
+*.sqllite
+*.swp
+__pycache__
+.tox
+Placement_Explorer.egg-info/
