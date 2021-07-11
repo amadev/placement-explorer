@@ -1,0 +1,16 @@
+{
+  "name": "placement_explorer_frontend",
+  "version": "0.1.0",
+  "description": "A frontend part for Placement-Explorer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrey Volkov",
+  "license": "MIT",
+  "devDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "shadow-cljs": "^2.15.0"
+  }
+}
