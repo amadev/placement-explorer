@@ -6,7 +6,30 @@
    [reitit.frontend :as reitit]
    [clerk.core :as clerk]
    [accountant.core :as accountant]
-   [datascript.core :as d]))
+   [datascript.core :as d]
+   [cljs.reader :as reader]))
+
+
+(defn pp [obj]
+  (with-out-str (cljs.pprint/pprint obj)))
+
+(def query (reagent/atom (str (pp '[:find
+                                    ?node
+                                    ?cpu_total
+                                    ?cpu_used
+                                    ?memory
+                                    ?memory_used
+                                    ?disk
+                                    ?disk_used
+                                    :where
+                                    [?e :node/name ?node]
+                                    [?e :memory_mb/total ?memory]
+                                    [?e :memory_mb/used ?memory_used]
+                                    [?e :disk_gb/total ?disk]
+                                    [?e :disk_gb/used ?disk_used]
+                                    [?e :vcpu/total ?cpu_total]
+                                    [?e :vcpu/used ?cpu_used]]
+                                  ))))
 
 ;; -------------------------
 ;; Routes
@@ -46,13 +69,11 @@
                 :cloud/name "devstack"}
                ])
   (d/transact! conn datoms)
-  (def query '[:find ?n ?c ?m
-               :where
-               [?e :node/name ?n]
-               [?e :memory_mb/total ?m]
-               [?e :vcpu/total ?c]
-               ])
-  (d/q query @conn))
+  (try
+    (def q (reader/read-string @query))
+    (d/q q @conn)
+    (catch :default e e))
+  )
 
 ;; -------------------------
 ;; Page components
@@ -62,11 +83,9 @@
     [:span.main
      [:h1 "Welcome to Placement-Explorer"]
      [:h2 "Query:"]
-     [:textarea {:style {:width 600 :height 300}}]
-     [:br]
-     [:button "Submit"]
+     [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
-     [:pre (with-out-str (cljs.pprint/pprint (get-data)))]]))
+     [:pre (pp (get-data))]]))
 
 (defn items-page []
   (fn []
