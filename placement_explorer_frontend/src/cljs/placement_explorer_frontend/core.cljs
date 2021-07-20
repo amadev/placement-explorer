@@ -7,7 +7,8 @@
    [clerk.core :as clerk]
    [accountant.core :as accountant]
    [datascript.core :as d]
-   [cljs.reader :as reader]))
+   [cljs.reader :as reader]
+   [datomic-query-helpers.core :refer [normalize]]))
 
 
 (defn pp [obj]
@@ -71,9 +72,21 @@
   (d/transact! conn datoms)
   (try
     (def q (reader/read-string @query))
-    (d/q q @conn)
-    (catch :default e e))
-  )
+    {:columns (:find (normalize q))
+     :results (d/q q @conn)}
+    (catch :default e e)))
+
+(defn table [results]
+  [:table {:border 1}
+   [:thead
+    [:tr
+     (for [column (:columns results)]
+       [:th column])]]
+   [:tbody
+    (for [row (:results results)]
+      [:tr
+       (for [col row]
+         [:td col])])]])
 
 ;; -------------------------
 ;; Page components
@@ -85,7 +98,11 @@
      [:h2 "Query:"]
      [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
-     [:pre (pp (get-data))]]))
+     (let [results (get-data)]
+       (if (contains? results :results)
+         (table results)
+         [:pre (pp results)]))
+     ]))
 
 (defn items-page []
   (fn []
