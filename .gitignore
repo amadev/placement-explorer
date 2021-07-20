@@ -8,3 +8,4 @@ __pycache__
 .tox
 Placement_Explorer.egg-info/
 placement_explorer_frontend/node_modules/
+placement_explorer_frontend/.rebel_readline_history
