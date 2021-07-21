@@ -42,6 +42,33 @@
      :series [{:type "line"
                :smooth true}]}}])
 
+(defn treemap []
+    [:> ECharts
+   {:style {:width "800px" :height "600px"}
+    :theme "dark"
+    :option
+    {:title {:text "dev01"}
+     :series [{:type "treemap"
+               :data [{:name "memory"
+                       :value 7976
+                       :children [{:name "memory_used"
+                                   :value 768},
+                                  {:name ""
+                                   :value 7208},
+                                  ]},
+                      {:name "disk"
+                       :value 4000
+                       :children [{:name "disk_used"
+                                   :value 2000},
+                                  {:name ""
+                                   :value 2000},]}
+                      {:name "cpu"
+                       :value 4000
+                       :children [{:name "cpu_used"
+                                   :value 2000},
+                                  {:name ""
+                                   :value 2000}]}]}]}}])
+
 (def query (reagent/atom (str (pp '[:find
                                     ?node
                                     ?cpu_total
@@ -117,7 +144,7 @@
          [:td col])])]])
 
 (defn show-graph []
-  [#'myechart])
+  [#'treemap])
 
 ;; -------------------------
 ;; Page components
