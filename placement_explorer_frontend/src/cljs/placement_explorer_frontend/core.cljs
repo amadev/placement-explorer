@@ -88,6 +88,9 @@
        (for [col row]
          [:td col])])]])
 
+(defn show-graph []
+  [:div])
+
 ;; -------------------------
 ;; Page components
 
@@ -100,9 +103,18 @@
      [:h2 "Results:"]
      (let [results (get-data)]
        (if (contains? results :results)
-         (table results)
-         [:pre (pp results)]))
-     ]))
+         [:div {:id "results-container"}
+          [:h3 "Table"]
+          (table results)
+          [:h3 "Graph"]
+          (show-graph)]
+         [:div
+          [:h3 "Error"]
+          [:pre (pp results)]]))
+     ]
+    )
+  )
+
 
 (defn items-page []
   (fn []
