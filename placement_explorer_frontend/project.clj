@@ -21,7 +21,8 @@
                  [venantius/accountant "0.2.5"
                   :exclusions [org.clojure/tools.reader]]
                  [datascript "1.2.2"]
-                 [datomic-query-helpers "0.1.1"]]
+                 [datomic-query-helpers "0.1.1"]
+                 [cljsjs/echarts "4.8.0-0"]]
 
   :jvm-opts ["-Xmx1G"]
 

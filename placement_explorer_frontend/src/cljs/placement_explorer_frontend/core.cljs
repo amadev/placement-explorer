@@ -1,6 +1,6 @@
 (ns placement-explorer-frontend.core
   (:require
-   [reagent.core :as reagent :refer [atom]]
+   [reagent.core :as reagent :refer [atom, as-element]]
    [reagent.dom :as rdom]
    [reagent.session :as session]
    [reitit.frontend :as reitit]
@@ -8,11 +8,39 @@
    [accountant.core :as accountant]
    [datascript.core :as d]
    [cljs.reader :as reader]
-   [datomic-query-helpers.core :refer [normalize]]))
+   [datomic-query-helpers.core :refer [normalize]]
+   [cljsjs.echarts]
+   [react :as react]))
 
 
 (defn pp [obj]
   (with-out-str (cljs.pprint/pprint obj)))
+
+(defn ECharts [options]
+  (as-element
+   (let [mychart (react/useRef nil)]
+     (react/useEffect (fn []
+                        (set! (.-chart js/document)
+                              (.init js/echarts (.-current mychart) (.-theme options)))
+                        (.setOption (.-chart js/document) (.-option options)))
+                      (clj->js [options js/ResizeObserver]))
+     [:div {:ref mychart
+            :style (.-style options)}])))
+
+(defn myechart []
+  [:> ECharts
+   {:style {:width "800px" :height "600px"}
+    :theme "dark"
+    :option
+    {:title {:text "Echarts is here"}
+     :dataset {:dimention [:Week :Value]
+               :source [{:Week "Mon" :Value 820} {:Week "Tue" :Value 932} {:Week "Wed" :Value 901}
+                        {:Week "Thu" :Value 934} {:Week "Fri" :Value 1220} {:Week "Sat" :Value 820}
+                        {:Week "Sun" :Value 990}]}
+     :xAxis {:type "category"}
+     :yAxis {:type "value"}
+     :series [{:type "line"
+               :smooth true}]}}])
 
 (def query (reagent/atom (str (pp '[:find
                                     ?node
@@ -89,7 +117,7 @@
          [:td col])])]])
 
 (defn show-graph []
-  [:div])
+  [#'myechart])
 
 ;; -------------------------
 ;; Page components
@@ -105,9 +133,10 @@
        (if (contains? results :results)
          [:div {:id "results-container"}
           [:h3 "Table"]
-          (table results)
+          [:div {:id "table-container"} (table results)]
           [:h3 "Graph"]
-          (show-graph)]
+          [:div {:id "graph-container"}
+           (show-graph)]]
          [:div
           [:h3 "Error"]
           [:pre (pp results)]]))
