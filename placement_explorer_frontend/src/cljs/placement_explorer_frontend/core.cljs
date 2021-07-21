@@ -42,8 +42,8 @@
      :series [{:type "line"
                :smooth true}]}}])
 
-(defn treemap []
-    [:> ECharts
+(defn treemap1 []
+  [:> ECharts
    {:style {:width "800px" :height "600px"}
     :theme "dark"
     :option
@@ -69,22 +69,51 @@
                                   {:name ""
                                    :value 2000}]}]}]}}])
 
+(defn treemap2 []
+    [:> ECharts
+   {:style {:width "800px" :height "600px"}
+    :theme "dark"
+    :option
+    {:title {:text "dev02"}
+     :series [{:type "treemap"
+               :data [{:name "memory"
+                       :value 4976
+                       :children [{:name "memory_used"
+                                   :value 768},
+                                  {:name ""
+                                   :value 4208},
+                                  ]},
+                      {:name "disk"
+                       :value 4000
+                       :children [{:name "disk_used"
+                                   :value 2000},
+                                  {:name ""
+                                   :value 2000},]}
+                      {:name "cpu"
+                       :value 4000
+                       :children [{:name "cpu_used"
+                                   :value 2000},
+                                  {:name ""
+                                   :value 2000}]}]}]}}])
+
+
 (def query (reagent/atom (str (pp '[:find
                                     ?node
-                                    ?cpu_total
-                                    ?cpu_used
-                                    ?memory
-                                    ?memory_used
-                                    ?disk
-                                    ?disk_used
+                                    ?r-cpu
+                                    ?r-cpu-used
+                                    ?r-mem
+                                    ?r-mem-used
+                                    ?r-disk
+                                    ?r-disk-used
                                     :where
                                     [?e :node/name ?node]
-                                    [?e :memory_mb/total ?memory]
-                                    [?e :memory_mb/used ?memory_used]
-                                    [?e :disk_gb/total ?disk]
-                                    [?e :disk_gb/used ?disk_used]
-                                    [?e :vcpu/total ?cpu_total]
-                                    [?e :vcpu/used ?cpu_used]]
+                                    [?e :memory_mb/total ?r-mem]
+                                    [?e :memory_mb/used ?r-mem-used]
+                                    [?e :disk_gb/total ?r-disk]
+                                    [?e :disk_gb/used ?r-disk-used]
+                                    [?e :vcpu/total ?r-cpu]
+                                    [?e :vcpu/used ?r-cpu-used]
+                                    ]
                                   ))))
 
 ;; -------------------------
@@ -144,7 +173,10 @@
          [:td col])])]])
 
 (defn show-graph []
-  [#'treemap])
+  [:div
+   [#'treemap1]
+   [#'treemap2]]
+  )
 
 ;; -------------------------
 ;; Page components
