@@ -42,6 +42,27 @@
      :series [{:type "line"
                :smooth true}]}}])
 
+(defn prepare-treemap-data [row columns]
+  (let [columns (map (fn [x] (subs (name x) 1)) columns)
+        data (zipmap columns row)
+        top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) data)
+        title (second (first (filter (fn [[k v]] (string? v)) data)))]
+    [title (for [[k v] top-level]
+             {:name k
+              :value v})]
+    )
+  )
+
+(defn treemap [[title data]]
+  [:> ECharts
+   {:style {:width "800px" :height "600px"}
+    :theme "dark"
+    :option
+    {:title {:text title}
+     :series [{:type "treemap"
+               :data data}]}}])
+
+
 (defn treemap1 []
   [:> ECharts
    {:style {:width "800px" :height "600px"}
@@ -99,20 +120,25 @@
 
 (def query (reagent/atom (str (pp '[:find
                                     ?node
-                                    ?r-cpu
-                                    ?r-cpu-used
-                                    ?r-mem
-                                    ?r-mem-used
-                                    ?r-disk
-                                    ?r-disk-used
+                                    ?cpu
+                                    ?cpu-used
+                                    ?mem
+                                    ?mem-used
+                                    ?disk
+                                    ?disk-used
                                     :where
                                     [?e :node/name ?node]
-                                    [?e :memory_mb/total ?r-mem]
-                                    [?e :memory_mb/used ?r-mem-used]
-                                    [?e :disk_gb/total ?r-disk]
-                                    [?e :disk_gb/used ?r-disk-used]
-                                    [?e :vcpu/total ?r-cpu]
-                                    [?e :vcpu/used ?r-cpu-used]
+                                    [?e :memory_mb/total ?mem]
+                                    [?e :memory_mb/used ?mem-used]
+                                    [?e :disk_gb/total ?d]
+                                    [?e :disk_gb/used ?du]
+                                    [?e :vcpu/total ?c]
+                                    [?e :vcpu/used ?cu]
+                                    [(* 1000 ?c) ?cpu]
+                                    [(* 1000 ?cu) ?cpu-used]
+                                    [(* 1000 ?d) ?disk]
+                                    [(* 1000 ?du) ?disk-used]
+
                                     ]
                                   ))))
 
@@ -135,7 +161,7 @@
 (defn get-data []
   (def conn (d/create-conn))
   (def datoms [{:db/id -1
-                :node/name "dev01"
+                :node/name "cmp001"
                 :memory_mb/total 7976
                 :memory_mb/used 768
                 :disk_gb/total 4
@@ -144,7 +170,16 @@
                 :vcpu/used 2
                 :cloud/name "devstack"}
                {:db/id -2
-                :node/name "dev02"
+                :node/name "cmp002"
+                :memory_mb/total 7976
+                :memory_mb/used 768
+                :disk_gb/total 4
+                :disk_gb/used 2
+                :vcpu/total 4
+                :vcpu/used 2
+                :cloud/name "devstack"}
+               {:db/id -3
+                :node/name "cmp003"
                 :memory_mb/total 7976
                 :memory_mb/used 768
                 :disk_gb/total 4
@@ -172,11 +207,11 @@
        (for [col row]
          [:td col])])]])
 
-(defn show-graph []
+(defn show-graph [results]
   [:div
-   [#'treemap1]
-   [#'treemap2]]
-  )
+   (for [row (:results results)]
+     [(fn [] (treemap (prepare-treemap-data row (:columns results))))]
+     )])
 
 ;; -------------------------
 ;; Page components
@@ -195,7 +230,7 @@
           [:div {:id "table-container"} (table results)]
           [:h3 "Graph"]
           [:div {:id "graph-container"}
-           (show-graph)]]
+           (show-graph results)]]
          [:div
           [:h3 "Error"]
           [:pre (pp results)]]))
