@@ -27,21 +27,6 @@
      [:div {:ref mychart
             :style (.-style options)}])))
 
-(defn myechart []
-  [:> ECharts
-   {:style {:width "800px" :height "600px"}
-    :theme "dark"
-    :option
-    {:title {:text "Echarts is here"}
-     :dataset {:dimention [:Week :Value]
-               :source [{:Week "Mon" :Value 820} {:Week "Tue" :Value 932} {:Week "Wed" :Value 901}
-                        {:Week "Thu" :Value 934} {:Week "Fri" :Value 1220} {:Week "Sat" :Value 820}
-                        {:Week "Sun" :Value 990}]}
-     :xAxis {:type "category"}
-     :yAxis {:type "value"}
-     :series [{:type "line"
-               :smooth true}]}}])
-
 (defn build-children [root data level]
   (if (empty? root)
     root
@@ -84,62 +69,6 @@
     {:title {:text title}
      :series [{:type "treemap"
                :data data}]}}])
-
-
-(defn treemap1 []
-  [:> ECharts
-   {:style {:width "800px" :height "600px"}
-    :theme "dark"
-    :option
-    {:title {:text "dev01"}
-     :series [{:type "treemap"
-               :data [{:name "memory"
-                       :value 7976
-                       :children [{:name "memory_used"
-                                   :value 768},
-                                  {:name ""
-                                   :value 7208},
-                                  ]},
-                      {:name "disk"
-                       :value 4000
-                       :children [{:name "disk_used"
-                                   :value 2000},
-                                  {:name ""
-                                   :value 2000},]}
-                      {:name "cpu"
-                       :value 4000
-                       :children [{:name "cpu_used"
-                                   :value 2000},
-                                  {:name ""
-                                   :value 2000}]}]}]}}])
-
-(defn treemap2 []
-    [:> ECharts
-   {:style {:width "800px" :height "600px"}
-    :theme "dark"
-    :option
-    {:title {:text "dev02"}
-     :series [{:type "treemap"
-               :data [{:name "memory"
-                       :value 4976
-                       :children [{:name "memory_used"
-                                   :value 768},
-                                  {:name ""
-                                   :value 4208},
-                                  ]},
-                      {:name "disk"
-                       :value 4000
-                       :children [{:name "disk_used"
-                                   :value 2000},
-                                  {:name ""
-                                   :value 2000},]}
-                      {:name "cpu"
-                       :value 4000
-                       :children [{:name "cpu_used"
-                                   :value 2000},
-                                  {:name ""
-                                   :value 2000}]}]}]}}])
-
 
 (def query (reagent/atom (str (pp '[:find
                                     ?node
