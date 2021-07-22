@@ -42,14 +42,37 @@
      :series [{:type "line"
                :smooth true}]}}])
 
+(defn build-children [root data level]
+  (if (empty? root)
+    root
+   (for [item root]
+     (let [children (filter
+                     (fn [[k v]] (and
+                                  (number? v)
+                                  (clojure.string/starts-with? k (:name item))
+                                  (not= k (:name item))
+                                  (= level (count (re-seq #"-" k)))))
+                     data)
+           new-root (for [[k v] children] {:name k :value v})]
+       (assoc item :children (build-children new-root data (+ 1 level)))
+       )
+     ))
+  )
+
+(defn treemap-add-available [root]
+  (if (empty? root)
+    root
+    (for [item root]
+      (let [s (reduce + (map (fn [v] (:value v)) (:children item)))]
+        (if (not= (:value item) s)
+          (assoc item :children (conj (:children item) {:name (str (:name item) "-available") :value (- (:value item) s)})))))))
+
 (defn prepare-treemap-data [row columns]
   (let [columns (map (fn [x] (subs (name x) 1)) columns)
         data (zipmap columns row)
         top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) data)
         title (second (first (filter (fn [[k v]] (string? v)) data)))]
-    [title (for [[k v] top-level]
-             {:name k
-              :value v})]
+    [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) data 1))]
     )
   )
 
