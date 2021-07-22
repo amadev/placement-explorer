@@ -61,9 +61,9 @@
     )
   )
 
-(defn treemap [[title data]]
+(defn treemap [title data size]
   [:> ECharts
-   {:style {:width "300px" :height "300px"}
+   {:style {:width size :height size}
     :theme "dark"
     :option
     {:title {:text title}
@@ -161,10 +161,19 @@
 
 (defn show-graph [results]
   [:div
-   (for [row (:results results)]
-     [:div {:style {:float "left"}}
-      [(fn [] (treemap (prepare-treemap-data row (:columns results))))]]
-     )])
+   (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:results results))
+         max-sum (reduce max row-sums)
+         ]
+     (for [row (:results results)]
+       [:div {:style {:float "left"}}
+        (let [[title data] (prepare-treemap-data row (:columns results))
+              K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
+              ]
+          [(fn [] (treemap title data (+ 200 (* 100 K))))])]
+       )
+     )
+   ]
+  )
 
 ;; -------------------------
 ;; Page components
