@@ -78,7 +78,7 @@
 
 (defn treemap [[title data]]
   [:> ECharts
-   {:style {:width "800px" :height "600px"}
+   {:style {:width "300px" :height "300px"}
     :theme "dark"
     :option
     {:title {:text title}
@@ -233,7 +233,8 @@
 (defn show-graph [results]
   [:div
    (for [row (:results results)]
-     [(fn [] (treemap (prepare-treemap-data row (:columns results))))]
+     [:div {:style {:float "left"}}
+      [(fn [] (treemap (prepare-treemap-data row (:columns results))))]]
      )])
 
 ;; -------------------------
@@ -308,7 +309,7 @@
         [:p [:a {:href (path-for :index)} "Home"] " | "
          [:a {:href (path-for :about)} "About Placement-Explorer"]]]
        [page]
-       [:footer
+       [:footer {:style {:clear "both"}}
         [:p "Placement-Explorer ©"]]])))
 
 ;; -------------------------
