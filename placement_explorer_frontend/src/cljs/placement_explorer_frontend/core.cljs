@@ -54,10 +54,10 @@
 
 (defn prepare-treemap-data [row columns]
   (let [columns (map (fn [x] (subs (name x) 1)) columns)
-        data (zipmap columns row)
-        top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) data)
-        title (second (first (filter (fn [[k v]] (string? v)) data)))]
-    [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) data 1))]
+        sorted (for [[i v] (map-indexed vector columns)] [v (get row i)])
+        top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) sorted)
+        title (second (first (filter (fn [[k v]] (string? v)) sorted)))]
+    [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))]
     )
   )
 
