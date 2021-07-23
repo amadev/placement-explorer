@@ -78,14 +78,23 @@
                                     ?mem-used
                                     ?disk
                                     ?disk-used
+                                    ?instance
+                                    ?mem-used-vm
+                                    ?disk-used-vm
+                                    ?cpu-used-vm
                                     :where
-                                    [?e :node/name ?node]
-                                    [?e :memory_mb/total ?mem]
-                                    [?e :memory_mb/used ?mem-used]
-                                    [?e :disk_gb/total ?d]
-                                    [?e :disk_gb/used ?du]
-                                    [?e :vcpu/total ?c]
-                                    [?e :vcpu/used ?cu]
+                                    [?i :instance/name ?instance]
+                                    [?i :instance/host ?n]
+                                    [?i :instance/memory ?mem-used-vm]
+                                    [?i :instance/disk ?disk-used-vm]
+                                    [?i :instance/cpu ?cpu-used-vm]
+                                    [?n :node/name ?node]
+                                    [?n :node/memory ?mem]
+                                    [?n :node/memory_used ?mem-used]
+                                    [?n :node/disk ?d]
+                                    [?n :node/disk_used ?du]
+                                    [?n :node/cpu ?c]
+                                    [?n :node/cpu_used ?cu]
                                     [(* 1000 ?c) ?cpu]
                                     [(* 1000 ?cu) ?cpu-used]
                                     [(* 1000 ?d) ?disk]
@@ -111,34 +120,59 @@
     (:path (reitit/match-by-name router route))))
 
 (defn get-data []
-  (def conn (d/create-conn))
+  (def schema {:node/name {:db/unique :db.unique/identity}})
+  (def conn (d/create-conn schema))
   (def datoms [{:db/id -1
                 :node/name "cmp001"
-                :memory_mb/total 7976
-                :memory_mb/used 768
-                :disk_gb/total 4
-                :disk_gb/used 2
-                :vcpu/total 4
-                :vcpu/used 2
+                :node/memory 7976
+                :node/memory_used 768
+                :node/disk 4
+                :node/disk_used 2
+                :node/cpu 4
+                :node/cpu_used 2
                 :cloud/name "devstack"}
                {:db/id -2
                 :node/name "cmp002"
-                :memory_mb/total 7976
-                :memory_mb/used 768
-                :disk_gb/total 4
-                :disk_gb/used 2
-                :vcpu/total 4
-                :vcpu/used 2
+                :node/memory 7976
+                :node/memory_used 768
+                :node/disk 4
+                :node/disk_used 2
+                :node/cpu 4
+                :node/cpu_used 2
                 :cloud/name "devstack"}
                {:db/id -3
                 :node/name "cmp003"
-                :memory_mb/total 7976
-                :memory_mb/used 768
-                :disk_gb/total 4
-                :disk_gb/used 2
-                :vcpu/total 4
-                :vcpu/used 2
+                :node/memory 7976
+                :node/memory_used 768
+                :node/disk 4
+                :node/disk_used 2
+                :node/cpu 4
+                :node/cpu_used 2
                 :cloud/name "devstack"}
+               {:db/id -100
+                :instance/name "vm1"
+                :instance/memory 384
+                :instance/disk 1
+                :instance/cpu 1
+                :instance/host [:node/name "cmp001"]}
+               {:db/id -101
+                :instance/name "vm2"
+                :instance/memory 384
+                :instance/disk 1
+                :instance/cpu 1
+                :instance/host [:node/name "cmp001"]}
+               {:db/id -102
+                :instance/name "vm3"
+                :instance/memory 768
+                :instance/disk 2
+                :instance/cpu 2
+                :instance/host [:node/name "cmp002"]}
+               {:db/id -103
+                :instance/name "vm4"
+                :instance/memory 768
+                :instance/disk 2
+                :instance/cpu 2
+                :instance/host [:node/name "cmp003"]}
                ])
   (d/transact! conn datoms)
   (try
