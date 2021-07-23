@@ -182,16 +182,17 @@
     (catch :default e e)))
 
 (defn table [results]
-  [:table {:border 1}
-   [:thead
-    [:tr
-     (for [column (:columns results)]
-       [:th column])]]
-   [:tbody
-    (for [row (:results results)]
-      [:tr
-       (for [col row]
-         [:td col])])]])
+  (let [columns (map (fn [x] (subs (name x) 1)) (:columns results))]
+   [:table {:border 1}
+    [:thead
+     [:tr
+      (for [column columns]
+        [:th column])]]
+    [:tbody
+     (for [row (:results results)]
+       [:tr
+        (for [col row]
+          [:td col])])]]))
 
 (defn show-graph [results]
   [:div
