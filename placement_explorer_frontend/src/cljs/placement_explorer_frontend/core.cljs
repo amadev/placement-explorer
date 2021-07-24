@@ -271,10 +271,11 @@
          ]
      (for [[i row] (map-indexed vector (merge-results results))]
        [:div {:style {:float "left"}}
-        (let [K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
+        (let [orig-row (nth (seq (:rows results)) i)
+              K (/ (reduce + (filter (fn [y] (number? y)) orig-row)) max-sum)
               ]
           [(fn [] (treemap
-                   (treemap-title (nth (seq (:rows results)) i) (:columns results))
+                   (treemap-title orig-row (:columns results))
                    (treemap-data (vals row) (keys row))
                    (+ 200 (* 100 K))))])]
        )
