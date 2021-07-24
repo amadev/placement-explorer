@@ -176,7 +176,7 @@
 (defn update-map [[i m]]
   (reduce-kv (fn [m k v]
                (assoc m (if (clojure.string/includes? k "|")
-                          (clojure.string/replace k #"\|" (str "-" (+ i 1))) k) v)) {} m))
+                          (clojure.string/replace k #"\|" (str (+ i 1))) k) v)) {} m))
 
 (defn merge-rows [rows]
   (reduce merge (map #(update-map %) (map-indexed vector rows)))
