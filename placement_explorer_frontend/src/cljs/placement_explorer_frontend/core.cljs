@@ -186,7 +186,8 @@
   (let [title-index (filter #(string? (second %)) (map-indexed vector (first (:rows results))))
         rows (for [i (:rows results)] (zipmap (:columns results) i))
         ]
-    (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows))
+    (if (not (empty? title-index))
+     (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
     )
   )
 
