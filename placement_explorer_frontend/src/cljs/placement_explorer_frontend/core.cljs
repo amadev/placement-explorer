@@ -52,12 +52,17 @@
         (if (not= (:value item) s)
           (assoc item :children (conj (:children item) {:name (str (:name item) " ") :value (- (:value item) s)})))))))
 
-(defn prepare-treemap-data [row columns]
+(defn treemap-title [row columns]
+  (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
+        ]
+    (second (first (filter (fn [[k v]] (string? v)) sorted))))
+  )
+
+(defn treemap-data [row columns]
   (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
         top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) sorted)
-        title (second (first (filter (fn [[k v]] (string? v)) sorted)))]
-
-    [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))]
+        ]
+    (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))
     )
   )
 
@@ -263,14 +268,15 @@
   [:div
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
-
          ]
-     (for [row (merge-results results)]
+     (for [[i row] (map-indexed vector (merge-results results))]
        [:div {:style {:float "left"}}
-        (let [[title data] (prepare-treemap-data (vals row) (keys row))
-              K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
+        (let [K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
               ]
-          [(fn [] (treemap title data (+ 200 (* 100 K))))])]
+          [(fn [] (treemap
+                   (treemap-title (nth (seq (:rows results)) i) (:columns results))
+                   (treemap-data (vals row) (keys row))
+                   (+ 200 (* 100 K))))])]
        )
      )
    ]
