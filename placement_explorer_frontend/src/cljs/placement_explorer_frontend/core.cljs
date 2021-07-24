@@ -156,6 +156,22 @@
 ;;                                     ]
 ;;                                   ))))
 
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     ?cloud
+;;                                     (sum ?mem)
+;;                                     (sum ?disk)
+;;                                     (sum ?cpu)
+;;                                     :with
+;;                                     ?node
+;;                                     :where
+;;                                     [?n :cloud/name ?cloud]
+;;                                     [?n :node/memory ?mem]
+;;                                     [?n :node/disk ?disk]
+;;                                     [?n :node/cpu ?cpu]
+;;                                     [?n :node/name ?node]
+;;                                     ]
+;;                                   ))))
+
 ;; -------------------------
 ;; Routes
 
