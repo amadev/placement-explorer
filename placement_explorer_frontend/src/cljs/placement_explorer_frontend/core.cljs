@@ -58,11 +58,10 @@
     (second (first (filter (fn [[k v]] (string? v)) sorted))))
   )
 
-(defn treemap-data [row columns]
-  (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
-        top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) sorted)
+(defn treemap-data [row]
+  (let [top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) row)
         ]
-    (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))
+    (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) row 1))
     )
   )
 
@@ -277,7 +276,7 @@
               ]
           [(fn [] (treemap
                    (treemap-title orig-row (:columns results))
-                   (treemap-data (vals row) (keys row))
+                   (treemap-data row)
                    (+ 200 (* 100 K))))])]
        )
      )
