@@ -102,6 +102,56 @@
                                     ]
                                   ))))
 
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     ?node
+;;                                     :where
+;;                                     [_ :node/name ?node]
+;;                                     ]
+;;                                   ))))
+
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     ?name
+;;                                     ?memory
+;;                                     :where
+;;                                     [?i :instance/name ?name]
+;;                                     [?i :instance/memory ?memory]
+;;                                     ]
+;;                                   ))))
+
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     (count ?node)
+;;                                     :where
+;;                                     [_ :node/name ?node]
+;;                                     ]
+;;                                   ))))
+
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     ?name
+;;                                     ?memory
+;;                                     ?memory-sys
+;;                                     ?memory-app
+;;                                     ?disk_mb
+;;                                     :where
+;;                                     [?i :instance/name ?name]
+;;                                     [?i :instance/memory ?memory]
+;;                                     [?i :instance/disk ?disk]
+;;                                     [(* 1024 ?disk) ?disk_mb]
+;;                                     [(* 0.2 ?memory) ?memory-sys]
+;;                                     [(* 0.8 ?memory) ?memory-app]
+;;                                     ]
+;;                                   ))))
+
+;; (def query (reagent/atom (str (pp '[:find
+;;                                     ?node
+;;                                     ?disk
+;;                                     :where
+;;                                     [?n :node/name ?node]
+;;                                     [?n :node/disk ?disk]
+;;                                     [(subs ?node 3) ?node_num]
+;;                                     [(< ?node_num "003")]
+;;                                     ]
+;;                                   ))))
+
 ;; -------------------------
 ;; Routes
 
