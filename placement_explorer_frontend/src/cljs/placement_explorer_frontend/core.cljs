@@ -227,7 +227,7 @@
   (try
     (def q (reader/read-string @query))
     {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
-     :results (d/q q @conn)}
+     :rows (d/q q @conn)}
     (catch :default e e)))
 
 (defn table [results]
@@ -237,17 +237,17 @@
      (for [column (:columns results)]
        [:th column])]]
    [:tbody
-    (for [row (:results results)]
+    (for [row (:rows results)]
       [:tr
        (for [col row]
          [:td col])])]])
 
 (defn show-graph [results]
   [:div
-   (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:results results))
+   (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
          ]
-     (for [row (:results results)]
+     (for [row (:rows results)]
        [:div {:style {:float "left"}}
         (let [[title data] (prepare-treemap-data row (:columns results))
               K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
@@ -269,7 +269,7 @@
      [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
      (let [results (get-data)]
-       (if (contains? results :results)
+       (if (contains? results :rows)
          [:div {:id "results-container"}
           [:h3 "Table"]
           [:div {:id "table-container"} (table results)]
