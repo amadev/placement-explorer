@@ -50,7 +50,7 @@
     (for [item root]
       (let [s (reduce + (map (fn [v] (:value v)) (:children item)))]
         (if (not= (:value item) s)
-          (assoc item :children (conj (:children item) {:name (str (:name item) "-available") :value (- (:value item) s)})))))))
+          (assoc item :children (conj (:children item) {:name (str (:name item) " ") :value (- (:value item) s)})))))))
 
 (defn prepare-treemap-data [row columns]
   (let [sorted (for [[i v] (map-indexed vector columns)] [v (get row i)])
