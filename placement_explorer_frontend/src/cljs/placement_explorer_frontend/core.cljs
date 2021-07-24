@@ -53,8 +53,7 @@
           (assoc item :children (conj (:children item) {:name (str (:name item) "-available") :value (- (:value item) s)})))))))
 
 (defn prepare-treemap-data [row columns]
-  (let [columns (map (fn [x] (subs (name x) 1)) columns)
-        sorted (for [[i v] (map-indexed vector columns)] [v (get row i)])
+  (let [sorted (for [[i v] (map-indexed vector columns)] [v (get row i)])
         top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) sorted)
         title (second (first (filter (fn [[k v]] (string? v)) sorted)))]
     [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))]
@@ -177,22 +176,21 @@
   (d/transact! conn datoms)
   (try
     (def q (reader/read-string @query))
-    {:columns (:find (normalize q))
+    {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
      :results (d/q q @conn)}
     (catch :default e e)))
 
 (defn table [results]
-  (let [columns (map (fn [x] (subs (name x) 1)) (:columns results))]
-   [:table {:border 1}
-    [:thead
-     [:tr
-      (for [column columns]
-        [:th column])]]
-    [:tbody
-     (for [row (:results results)]
-       [:tr
-        (for [col row]
-          [:td col])])]]))
+  [:table {:border 1}
+   [:thead
+    [:tr
+     (for [column (:columns results)]
+       [:th column])]]
+   [:tbody
+    (for [row (:results results)]
+      [:tr
+       (for [col row]
+         [:td col])])]])
 
 (defn show-graph [results]
   [:div
