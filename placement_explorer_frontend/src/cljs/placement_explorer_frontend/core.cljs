@@ -53,9 +53,10 @@
           (assoc item :children (conj (:children item) {:name (str (:name item) " ") :value (- (:value item) s)})))))))
 
 (defn prepare-treemap-data [row columns]
-  (let [sorted (for [[i v] (map-indexed vector columns)] [v (get row i)])
+  (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
         top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) sorted)
         title (second (first (filter (fn [[k v]] (string? v)) sorted)))]
+
     [title (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) sorted 1))]
     )
   )
@@ -77,16 +78,12 @@
                                     ?mem-used
                                     ?disk
                                     ?disk-used
-                                    ?instance
-                                    ?mem-used-vm
-                                    ?disk-used-vm
-                                    ?cpu-used-vm
+                                    ?instance|
+                                    ?mem-used|
+                                    ?disk-used|
+                                    ?cpu-used|
                                     :where
-                                    [?i :instance/name ?instance]
                                     [?i :instance/host ?n]
-                                    [?i :instance/memory ?mem-used-vm]
-                                    [?i :instance/disk ?disk-used-vm]
-                                    [?i :instance/cpu ?cpu-used-vm]
                                     [?n :node/name ?node]
                                     [?n :node/memory ?mem]
                                     [?n :node/memory_used ?mem-used]
@@ -98,7 +95,10 @@
                                     [(* 1000 ?cu) ?cpu-used]
                                     [(* 1000 ?d) ?disk]
                                     [(* 1000 ?du) ?disk-used]
-
+                                    [?i :instance/name ?instance|]
+                                    [?i :instance/memory ?mem-used|]
+                                    [?i :instance/disk ?disk-used|]
+                                    [?i :instance/cpu ?cpu-used|]
                                     ]
                                   ))))
 
@@ -167,6 +167,23 @@
   (if params
     (:path (reitit/match-by-name router route params))
     (:path (reitit/match-by-name router route))))
+
+(defn update-map [[i m]]
+  (reduce-kv (fn [m k v]
+               (assoc m (if (clojure.string/includes? k "|")
+                          (clojure.string/replace k #"\|" (str "-" (+ i 1))) k) v)) {} m))
+
+(defn merge-rows [rows]
+  (reduce merge (map #(update-map %) (map-indexed vector rows)))
+  )
+
+(defn merge-results [results]
+  (let [title-index (filter #(string? (second %)) (map-indexed vector (first (:rows results))))
+        rows (for [i (:rows results)] (zipmap (:columns results) i))
+        ]
+    (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows))
+    )
+  )
 
 (defn get-data []
   (def schema {:node/name {:db/unique :db.unique/identity}})
@@ -246,10 +263,11 @@
   [:div
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
+
          ]
-     (for [row (:rows results)]
+     (for [row (merge-results results)]
        [:div {:style {:float "left"}}
-        (let [[title data] (prepare-treemap-data row (:columns results))
+        (let [[title data] (prepare-treemap-data (vals row) (keys row))
               K (/ (reduce + (filter (fn [y] (number? y)) row)) max-sum)
               ]
           [(fn [] (treemap title data (+ 200 (* 100 K))))])]
