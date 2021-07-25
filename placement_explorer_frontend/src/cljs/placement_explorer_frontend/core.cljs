@@ -11,7 +11,12 @@
    [datomic-query-helpers.core :refer [normalize]]
    [cljsjs.echarts]
    [cljs.pprint]
-   [react :as react]))
+   [react :as react]
+   [cljs.core.async :refer [<!]]
+   [cljs-http.client :as http])
+  (:require-macros
+   [cljs.core.async.macros :refer [go]])
+  )
 
 
 ;; --- utils
@@ -258,6 +263,13 @@
     {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
      :rows (d/q q @conn)}
     (catch :default e e)))
+
+(defn import-data []
+  (go (let [response (<! (http/get "http://localhost:5000/resource"))]
+        response
+        )
+      )
+  )
 
 ;; -------------------------
 ;; --- Routes
