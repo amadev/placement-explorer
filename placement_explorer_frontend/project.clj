@@ -56,7 +56,7 @@
              {:output-to        "target/cljsbuild/public/js/app.js"
               :output-dir       "target/cljsbuild/public/js"
               :source-map       "target/cljsbuild/public/js/app.js.map"
-              :optimizations :advanced
+              :optimizations :whitespace
               :infer-externs true
               :pretty-print  false}}
             :app

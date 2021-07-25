@@ -10,6 +10,7 @@
    [cljs.reader :as reader]
    [datomic-query-helpers.core :refer [normalize]]
    [cljsjs.echarts]
+   [cljs.pprint]
    [react :as react]))
 
 
