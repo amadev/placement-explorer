@@ -14,6 +14,8 @@
    [react :as react]))
 
 
+;; --- utils
+
 (defn pp [obj]
   (with-out-str (cljs.pprint/pprint obj)))
 
@@ -27,6 +29,8 @@
                       (clj->js [options js/ResizeObserver]))
      [:div {:ref mychart
             :style (.-style options)}])))
+
+;; --- treemap
 
 (defn build-children [root data level]
   (if (empty? root)
@@ -74,6 +78,26 @@
     {:title {:text title}
      :series [{:type "treemap"
                :data data}]}}])
+
+(defn update-map [[i m]]
+  (reduce-kv (fn [m k v]
+               (assoc m (if (clojure.string/includes? k "|")
+                          (clojure.string/replace k #"\|" (str (+ i 1))) k) v)) {} m))
+
+(defn merge-rows [rows]
+  (reduce merge (map #(update-map %) (map-indexed vector rows)))
+  )
+
+(defn merge-results [results]
+  (let [title-index (filter #(string? (second %)) (map-indexed vector (first (:rows results))))
+        rows (for [i (:rows results)] (zipmap (:columns results) i))
+        ]
+    (if (not (empty? title-index))
+     (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
+    )
+  )
+
+;; --- database
 
 (def query (reagent/atom (str (pp '[:find
                                     ?node
@@ -173,40 +197,6 @@
 ;;                                     ]
 ;;                                   ))))
 
-;; -------------------------
-;; Routes
-
-(def router
-  (reitit/router
-   [["/" :index]
-    ["/items"
-     ["" :items]
-     ["/:item-id" :item]]
-    ["/about" :about]]))
-
-(defn path-for [route & [params]]
-  (if params
-    (:path (reitit/match-by-name router route params))
-    (:path (reitit/match-by-name router route))))
-
-(defn update-map [[i m]]
-  (reduce-kv (fn [m k v]
-               (assoc m (if (clojure.string/includes? k "|")
-                          (clojure.string/replace k #"\|" (str (+ i 1))) k) v)) {} m))
-
-(defn merge-rows [rows]
-  (reduce merge (map #(update-map %) (map-indexed vector rows)))
-  )
-
-(defn merge-results [results]
-  (let [title-index (filter #(string? (second %)) (map-indexed vector (first (:rows results))))
-        rows (for [i (:rows results)] (zipmap (:columns results) i))
-        ]
-    (if (not (empty? title-index))
-     (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
-    )
-  )
-
 (defn get-data []
   (def schema {:node/name {:db/unique :db.unique/identity}})
   (def conn (d/create-conn schema))
@@ -269,6 +259,25 @@
      :rows (d/q q @conn)}
     (catch :default e e)))
 
+;; -------------------------
+;; --- Routes
+
+(def router
+  (reitit/router
+   [["/" :index]
+    ["/items"
+     ["" :items]
+     ["/:item-id" :item]]
+    ["/about" :about]]))
+
+(defn path-for [route & [params]]
+  (if params
+    (:path (reitit/match-by-name router route params))
+    (:path (reitit/match-by-name router route))))
+
+;; -------------------------
+;; --- Page components
+
 (defn table [results]
   [:table {:border 1}
    [:thead
@@ -299,9 +308,6 @@
      )
    ]
   )
-
-;; -------------------------
-;; Page components
 
 (defn home-page []
   (fn []
@@ -351,7 +357,7 @@
 
 
 ;; -------------------------
-;; Translate routes -> page components
+;; --- Translate routes -> page components
 
 (defn page-for [route]
   (case route
@@ -362,7 +368,7 @@
 
 
 ;; -------------------------
-;; Page mounting component
+;; --- Page mounting component
 
 (defn current-page []
   (fn []
@@ -376,7 +382,7 @@
         [:p "Placement-Explorer ©"]]])))
 
 ;; -------------------------
-;; Initialize app
+;; --- Initialize app
 
 (defn mount-root []
   (rdom/render [current-page] (.getElementById js/document "app")))
