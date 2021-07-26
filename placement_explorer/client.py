@@ -37,4 +37,11 @@ def get_resources(cloud):
         for i in usages["usages"]:
             k, v = remap(i, usages["usages"][i])
             results[p["name"]]["resources"][k]["used"] = v
+        allocations = client.resource_providers.get_allocations(uuid=p["uuid"])
+        results[p["name"]]["instances"] = {}
+        for instance in allocations["allocations"]:
+            results[p["name"]]["instances"][instance] = {}
+            for k, v in allocations["allocations"][instance]["resources"].items():
+                k, v = remap(k, v)
+                results[p["name"]]["instances"][instance][k] = v
     return results
