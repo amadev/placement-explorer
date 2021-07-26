@@ -25,7 +25,7 @@ docker run amadev/placement-explorer -p 5000:5000
 
 tox -e py37
 export FLASK_APP=placement_explorer.app
-.tox/py37/bin/flask run
+.tox/py37/bin/flask run --reload
 
 *** Frontend
 
