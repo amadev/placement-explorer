@@ -22,7 +22,7 @@
 ;; --- config
 
 (def DATA-URL "//localhost:5000/resource")
-(def USE-FAKE-DB false)
+(def USE-FAKE-DB true)
 (def BLOCK-SIZE-BASE 200)
 (def BLOCK-SIZE-VARIABLE 100)
 
@@ -123,7 +123,7 @@
                    :node/memory 7976
                    :node/memory_used 768
                    :node/disk 4096
-                   :node/disk_used 2
+                   :node/disk_used 2048
                    :node/cpu 4
                    :node/cpu_used 2
                    :cloud/name "devstack"}
@@ -132,7 +132,7 @@
                    :node/memory 7976
                    :node/memory_used 768
                    :node/disk 4096
-                   :node/disk_used 2
+                   :node/disk_used 2048
                    :node/cpu 4
                    :node/cpu_used 2
                    :cloud/name "devstack"}
@@ -141,7 +141,7 @@
                    :node/memory 7976
                    :node/memory_used 768
                    :node/disk 4096
-                   :node/disk_used 2
+                   :node/disk_used 2048
                    :node/cpu 4
                    :node/cpu_used 2
                    :cloud/name "devstack"}
