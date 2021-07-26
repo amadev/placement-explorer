@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, make_response
 
 import placement_explorer.resource
 
@@ -7,12 +7,9 @@ app = Flask(__name__)
 
 @app.route("/resource")
 def resource():
-    return placement_explorer.resource.collect()
-
-
-# @app.route('/static/<path:path>')
-# def send_js(path):
-#     return send_from_directory('static', path)
+    response = make_response(jsonify(placement_explorer.resource.collect()))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 
 @app.route("/")
