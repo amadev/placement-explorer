@@ -315,9 +315,9 @@
                                        ))
                                     )))
               ]
-          (prn nodes)
-          (prn instances)
-          (reset! datoms (concat nodes instances))
+          (let [loaded-datoms (concat nodes instances)]
+            (prn "Got data from server" loaded-datoms)
+            (reset! datoms loaded-datoms))
           )
         ))
   )
