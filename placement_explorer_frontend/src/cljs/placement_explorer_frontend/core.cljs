@@ -113,7 +113,7 @@
 
 (def schema {:node/name {:db/unique :db.unique/identity}})
 
-(def conn (d/create-conn schema))
+(defonce conn (d/create-conn schema))
 
 (def fake-datoms [{:db/id -1
                    :node/name "cmp001"
