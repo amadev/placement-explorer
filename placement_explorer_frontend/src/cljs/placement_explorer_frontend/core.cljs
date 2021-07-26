@@ -98,7 +98,7 @@
         rows (for [i (:rows results)] (zipmap (:columns results) i))
         ]
     (if (not (empty? title-index))
-     (map (fn [[k v]] (merge-rows v)) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
+      (map (fn [[k v]] [k (merge-rows v)]) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
     )
   )
 
@@ -307,13 +307,12 @@
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
          ]
-     (for [[i row] (map-indexed vector (merge-results results))]
+     (for [[name row] (merge-results results)]
        [:div {:style {:float "left"}}
-        (let [orig-row (nth (seq (:rows results)) i)
-              K (/ (reduce + (filter (fn [y] (number? y)) orig-row)) max-sum)
+        (let [K (/ (reduce + (filter (fn [y] (number? y)) (vals row))) max-sum)
               ]
           [(fn [] (treemap
-                   (treemap-title orig-row (:columns results))
+                   name
                    (treemap-data row)
                    (+ 200 (* 100 K))))])]
        )
