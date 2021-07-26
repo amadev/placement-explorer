@@ -1,6 +1,20 @@
 import os_sdk_light as osl
 
 
+mapping = {'disk_gb': ['disk', lambda x: x * 1024],
+           'memory_mb': ['memory'],
+           'vcpu': ['cpu']}
+
+def remap(k, v):
+    k = k.lower()
+    if k in mapping:
+        if len(mapping[k]) == 2:
+            v = mapping[k][1](v)
+        k = mapping[k][0]
+    return [k, v]
+
+
+
 def get_resources(cloud):
     client = osl.get_client(
         cloud=cloud, service="placement", schema=osl.schema("placement.yaml")
@@ -15,10 +29,12 @@ def get_resources(cloud):
         results[p["name"]] = {"uuid": p["uuid"], "resources": {}}
         inv = client.resource_providers.get_inventories(uuid=p["uuid"])
         for i in inv["inventories"]:
-            results[p["name"]]["resources"][i] = {
-                "total": inv["inventories"][i]["total"]
+            k, v = remap(i, inv["inventories"][i]["total"])
+            results[p["name"]]["resources"][k] = {
+                "total": v
             }
         usages = client.resource_providers.get_usages(uuid=p["uuid"])
         for i in usages["usages"]:
-            results[p["name"]]["resources"][i]["used"] = usages["usages"][i]
+            k, v = remap(i, usages["usages"][i])
+            results[p["name"]]["resources"][k]["used"] = v
     return results
