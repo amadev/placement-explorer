@@ -22,7 +22,7 @@
 ;; --- config
 
 (def DATA-URL "//localhost:5000/resource")
-(def USE-FAKE-DB true)
+(def USE-FAKE-DB false)
 (def BLOCK-SIZE-BASE 200)
 (def BLOCK-SIZE-VARIABLE 100)
 
@@ -119,7 +119,7 @@
                    :node/name "cmp001"
                    :node/memory 7976
                    :node/memory_used 768
-                   :node/disk 4
+                   :node/disk 4096
                    :node/disk_used 2
                    :node/cpu 4
                    :node/cpu_used 2
@@ -128,7 +128,7 @@
                    :node/name "cmp002"
                    :node/memory 7976
                    :node/memory_used 768
-                   :node/disk 4
+                   :node/disk 4096
                    :node/disk_used 2
                    :node/cpu 4
                    :node/cpu_used 2
@@ -137,7 +137,7 @@
                    :node/name "cmp003"
                    :node/memory 7976
                    :node/memory_used 768
-                   :node/disk 4
+                   :node/disk 4096
                    :node/disk_used 2
                    :node/cpu 4
                    :node/cpu_used 2
@@ -145,25 +145,25 @@
                   {:db/id -100
                    :instance/name "vm1"
                    :instance/memory 384
-                   :instance/disk 1
+                   :instance/disk 1024
                    :instance/cpu 1
                    :instance/host [:node/name "cmp001"]}
                   {:db/id -101
                    :instance/name "vm2"
                    :instance/memory 384
-                   :instance/disk 1
+                   :instance/disk 1024
                    :instance/cpu 1
                    :instance/host [:node/name "cmp001"]}
                   {:db/id -102
                    :instance/name "vm3"
                    :instance/memory 768
-                   :instance/disk 2
+                   :instance/disk 2048
                    :instance/cpu 2
                    :instance/host [:node/name "cmp002"]}
                   {:db/id -103
                    :instance/name "vm4"
                    :instance/memory 768
-                   :instance/disk 2
+                   :instance/disk 2048
                    :instance/cpu 2
                    :instance/host [:node/name "cmp003"]}
                   ])
@@ -177,26 +177,24 @@
                                     ?disk
                                     ?disk-used
                                     ?instance|
-                                    ?mem-used|
-                                    ?disk-used|
-                                    ?cpu-used|
+                                    ?mem-used-|
+                                    ?disk-used-|
+                                    ?cpu-used-|
                                     :where
                                     [?i :instance/host ?n]
                                     [?n :node/name ?node]
                                     [?n :node/memory ?mem]
                                     [?n :node/memory_used ?mem-used]
-                                    [?n :node/disk ?d]
-                                    [?n :node/disk_used ?du]
+                                    [?n :node/disk ?disk]
+                                    [?n :node/disk_used ?disk-used]
                                     [?n :node/cpu ?c]
                                     [?n :node/cpu_used ?cu]
                                     [(* 1000 ?c) ?cpu]
                                     [(* 1000 ?cu) ?cpu-used]
-                                    [(* 1000 ?d) ?disk]
-                                    [(* 1000 ?du) ?disk-used]
                                     [?i :instance/name ?instance|]
-                                    [?i :instance/memory ?mem-used|]
-                                    [?i :instance/disk ?disk-used|]
-                                    [?i :instance/cpu ?cpu-used|]
+                                    [?i :instance/memory ?mem-used-|]
+                                    [?i :instance/disk ?disk-used-|]
+                                    [?i :instance/cpu ?cpu-used-|]
                                     ]
                                   ))))
 
@@ -287,26 +285,41 @@
          (keyword (str "node/" (name k) "_used")) (:used v))
   )
 
+(defn set-instance-resource [m k v]
+  (assoc m (keyword (str "instance/" (name k))) v)
+  )
 
 (defn import-server-data []
   (let [out (chan)]
-   (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
-             nodes (map first
-                        (for [[cloud-name cloud] (:body response)]
-                          (for [[node-name node] (:nodes cloud)]
-                            (merge
-                             {:cloud/name (name cloud-name)
-                              :node/name (name node-name)
-                              :db/id (name node-name)}
-                             (reduce-kv set-resource {} (:resources node))
-                             )
-                            )
-                          ))
-             ]
-         (prn nodes)
-         (reset! datoms nodes)
-         )
-       ))
+    (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
+              nodes (first
+                     (for [[cloud-name cloud] (:body response)]
+                       (for [[node-name node] (:nodes cloud)]
+                         (merge
+                          {:cloud/name (name cloud-name)
+                           :node/name (name node-name)
+                           :db/id (name node-name)}
+                          (reduce-kv set-resource {} (:resources node))
+                          )
+                         )
+                       ))
+              instances (ffirst (for [[cloud-name cloud] (:body response)]
+                                  (for [[node-name node] (:nodes cloud)]
+                                    (for [[instance-uuid resources] (:instances node)]
+                                      (merge
+                                       {:db/id (name instance-uuid)
+                                        :instance/name (name instance-uuid)
+                                        :instance/host [:node/name (name node-name)]
+                                        }
+                                       (reduce-kv set-instance-resource {} resources)
+                                       ))
+                                    )))
+              ]
+          (prn nodes)
+          (prn instances)
+          (reset! datoms (concat nodes instances))
+          )
+        ))
   )
 
 ;; -------------------------
