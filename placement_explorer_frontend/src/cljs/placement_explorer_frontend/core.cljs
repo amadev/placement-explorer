@@ -37,7 +37,10 @@
      (react/useEffect (fn []
                         (set! (.-chart js/document)
                               (.init js/echarts (.-current mychart) (.-theme options)))
-                        (.setOption (.-chart js/document) (.-option options)))
+                        (try
+                          (.setOption (.-chart js/document) (.-option options))
+                          (catch :default e
+                            (.error js/console (str "Graph construction error " e)))))
                       (clj->js [options js/ResizeObserver]))
      [:div {:ref mychart
             :style (.-style options)}])))
@@ -355,6 +358,7 @@
 
 (defn show-graph [results]
   [:div
+   ;; TODO: calculate row sum for top level only
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
          ]
@@ -362,6 +366,7 @@
        [:div {:style {:float "left"}}
         (let [K (/ (reduce + (filter (fn [y] (number? y)) (vals row))) max-sum)
               ]
+          (prn "treemap" name (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
           [(fn [] (treemap
                    name
                    (treemap-data row)
