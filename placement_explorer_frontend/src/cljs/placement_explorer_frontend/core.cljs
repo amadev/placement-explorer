@@ -12,7 +12,7 @@
    [cljsjs.echarts]
    [cljs.pprint]
    [react :as react]
-   [cljs.core.async :refer [<!]]
+   [cljs.core.async :refer [<!, chan]]
    [cljs-http.client :as http])
   (:require-macros
    [cljs.core.async.macros :refer [go]])
@@ -113,7 +113,7 @@
 
 (def schema {:node/name {:db/unique :db.unique/identity}})
 
-(defonce conn (d/create-conn schema))
+(defonce datoms (reagent/atom []))
 
 (def fake-datoms [{:db/id -1
                    :node/name "cmp001"
@@ -202,8 +202,14 @@
 
 ;; (def query (reagent/atom (str (pp '[:find
 ;;                                     ?node
+;;                                     ?memory
+;;                                     ?disk
+;;                                     ?cpu
 ;;                                     :where
-;;                                     [_ :node/name ?node]
+;;                                     [?n :node/name ?node]
+;;                                     [?n :node/memory ?memory]
+;;                                     [?n :node/disk ?disk]
+;;                                     [?n :node/cpu ?cpu]
 ;;                                     ]
 ;;                                   ))))
 
@@ -266,16 +272,14 @@
 ;;                                     ]
 ;;                                   ))))
 
-(defn create-db [data]
-  (prn "create db" data)
-  (d/transact! conn data))
-
-(defn get-data []
-  (try
-    (def q (reader/read-string @query))
-    {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
-     :rows (d/q q @conn)}
-    (catch :default e e)))
+(defn query-data []
+  (let [conn (d/create-conn schema)]
+    (d/transact! conn @datoms)
+    (try
+      (def q (reader/read-string @query))
+      {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
+       :rows (d/q q @conn)}
+      (catch :default e e))))
 
 
 (defn set-resource [m k v]
@@ -284,23 +288,25 @@
   )
 
 
-(defn server-data []
-  (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
-            nodes (map first
-                       (for [[cloud-name cloud] (:body response)]
-                         (for [[node-name node] (:nodes cloud)]
-                           (merge
-                            {:cloud/name (name cloud-name)
-                             :node/name (name node-name)
-                             :db/id (name node-name)}
-                            (reduce-kv set-resource {} (:resources node))
+(defn import-server-data []
+  (let [out (chan)]
+   (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
+             nodes (map first
+                        (for [[cloud-name cloud] (:body response)]
+                          (for [[node-name node] (:nodes cloud)]
+                            (merge
+                             {:cloud/name (name cloud-name)
+                              :node/name (name node-name)
+                              :db/id (name node-name)}
+                             (reduce-kv set-resource {} (:resources node))
+                             )
                             )
-                           )
-                         ))
-            ]
-        (prn nodes)
-        )
-      )
+                          ))
+             ]
+         (prn nodes)
+         (reset! datoms nodes)
+         )
+       ))
   )
 
 ;; -------------------------
@@ -359,7 +365,7 @@
      [:h2 "Query:"]
      [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
-     (let [results (get-data)]
+     (let [results (query-data)]
        (if (contains? results :rows)
          [:div {:id "results-container"}
           [:h3 "Table"]
@@ -373,7 +379,6 @@
      ]
     )
   )
-
 
 (defn items-page []
   (fn []
@@ -448,6 +453,6 @@
       (boolean (reitit/match-by-path router path)))})
   (accountant/dispatch-current!)
   (if USE-FAKE-DB
-    (create-db fake-datoms)
-    (create-db server-data))
+    (reset! datoms fake-datoms)
+    (import-server-data))
   (mount-root))
