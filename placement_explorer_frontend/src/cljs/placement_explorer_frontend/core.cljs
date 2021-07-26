@@ -19,6 +19,11 @@
   )
 
 
+;; --- config
+
+(def DATA-URL "//localhost:5000/resource")
+(def USE-FAKE-DB false)
+
 ;; --- utils
 
 (defn pp [obj]
@@ -264,9 +269,28 @@
      :rows (d/q q @conn)}
     (catch :default e e)))
 
+
+(defn set-resource [m k v]
+  (assoc m (keyword (str "node/" (name k))) (:total v))
+  (assoc m (keyword (str "node/" (name k) "_used")) (:used v))
+  )
+
+
 (defn import-data []
-  (go (let [response (<! (http/get "http://localhost:5000/resource"))]
-        response
+  (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
+            nodes (map first
+                       (for [[cloud-name cloud] (:body response)]
+                         (for [[node-name node] (:nodes cloud)]
+                           (merge
+                            {:cloud/name (name cloud-name)
+                             :node/name (name node-name)
+                             :db/id (name node-name)}
+                            (reduce-kv set-resource {} (:resources node))
+                            )
+                           )
+                         ))
+            ]
+        (prn nodes)
         )
       )
   )
