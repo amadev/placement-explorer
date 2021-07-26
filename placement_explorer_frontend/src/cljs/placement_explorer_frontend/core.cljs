@@ -279,8 +279,8 @@
 
 
 (defn set-resource [m k v]
-  (assoc m (keyword (str "node/" (name k))) (:total v))
-  (assoc m (keyword (str "node/" (name k) "_used")) (:used v))
+  (assoc (assoc m (keyword (str "node/" (name k))) (:total v))
+         (keyword (str "node/" (name k) "_used")) (:used v))
   )
 
 
