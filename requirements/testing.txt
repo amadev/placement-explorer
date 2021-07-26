@@ -8,7 +8,7 @@
 -r base.txt
 -e file:.
     # via -r requirements/base.in
-astroid==2.6.2
+astroid==2.6.5
     # via pylint
 backcall==0.2.0
     # via ipython
@@ -48,7 +48,7 @@ py==1.10.0
     # via pytest
 pygments==2.9.0
     # via ipython
-pylint==2.9.3
+pylint==2.9.5
     # via -r requirements/testing.in
 pyparsing==2.4.7
     # via packaging

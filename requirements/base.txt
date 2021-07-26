@@ -19,7 +19,7 @@ certifi==2021.5.30
     # via requests
 cffi==1.14.6
     # via cryptography
-chardet==4.0.0
+charset-normalizer==2.0.3
     # via requests
 click==8.0.1
     # via flask
@@ -33,11 +33,11 @@ dogpile.cache==1.1.3
     # via openstacksdk
 flask==2.0.1
     # via placement-explorer
-idna==2.10
+idna==3.2
     # via
     #   jsonschema
     #   requests
-iso8601==0.1.14
+iso8601==0.1.16
     # via
     #   keystoneauth1
     #   openstacksdk
@@ -73,7 +73,7 @@ munch==2.5.0
     # via openstacksdk
 netifaces==0.11.0
     # via openstacksdk
-openstacksdk==0.57.0
+openstacksdk==0.58.0
     # via os-client-config
 os-client-config==2.1.0
     # via os-sdk-light
@@ -93,7 +93,7 @@ pycparser==2.20
     # via cffi
 pyrsistent==0.18.0
     # via jsonschema
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   bravado
     #   bravado-core
@@ -105,7 +105,7 @@ pyyaml==5.4.1
     #   bravado-core
     #   openstacksdk
     #   swagger-spec-validator
-requests==2.25.1
+requests==2.26.0
     # via
     #   bravado
     #   keystoneauth1

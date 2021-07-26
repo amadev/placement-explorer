@@ -1,9 +1,11 @@
 import os_sdk_light as osl
 
+mapping = {
+    "disk_gb": ["disk", lambda x: x * 1024],
+    "memory_mb": ["memory"],
+    "vcpu": ["cpu"],
+}
 
-mapping = {'disk_gb': ['disk', lambda x: x * 1024],
-           'memory_mb': ['memory'],
-           'vcpu': ['cpu']}
 
 def remap(k, v):
     k = k.lower()
@@ -12,7 +14,6 @@ def remap(k, v):
             v = mapping[k][1](v)
         k = mapping[k][0]
     return [k, v]
-
 
 
 def get_resources(cloud):
@@ -30,9 +31,7 @@ def get_resources(cloud):
         inv = client.resource_providers.get_inventories(uuid=p["uuid"])
         for i in inv["inventories"]:
             k, v = remap(i, inv["inventories"][i]["total"])
-            results[p["name"]]["resources"][k] = {
-                "total": v
-            }
+            results[p["name"]]["resources"][k] = {"total": v}
         usages = client.resource_providers.get_usages(uuid=p["uuid"])
         for i in usages["usages"]:
             k, v = remap(i, usages["usages"][i])
