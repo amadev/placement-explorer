@@ -22,7 +22,7 @@
 ;; --- config
 
 (def DATA-URL "//localhost:5000/resource")
-(def USE-FAKE-DB false)
+(def USE-FAKE-DB true)
 
 ;; --- utils
 
@@ -108,6 +108,63 @@
   )
 
 ;; --- database
+
+(def schema {:node/name {:db/unique :db.unique/identity}})
+
+(def conn (d/create-conn schema))
+
+(def fake-datoms [{:db/id -1
+                   :node/name "cmp001"
+                   :node/memory 7976
+                   :node/memory_used 768
+                   :node/disk 4
+                   :node/disk_used 2
+                   :node/cpu 4
+                   :node/cpu_used 2
+                   :cloud/name "devstack"}
+                  {:db/id -2
+                   :node/name "cmp002"
+                   :node/memory 7976
+                   :node/memory_used 768
+                   :node/disk 4
+                   :node/disk_used 2
+                   :node/cpu 4
+                   :node/cpu_used 2
+                   :cloud/name "devstack"}
+                  {:db/id -3
+                   :node/name "cmp003"
+                   :node/memory 7976
+                   :node/memory_used 768
+                   :node/disk 4
+                   :node/disk_used 2
+                   :node/cpu 4
+                   :node/cpu_used 2
+                   :cloud/name "devstack"}
+                  {:db/id -100
+                   :instance/name "vm1"
+                   :instance/memory 384
+                   :instance/disk 1
+                   :instance/cpu 1
+                   :instance/host [:node/name "cmp001"]}
+                  {:db/id -101
+                   :instance/name "vm2"
+                   :instance/memory 384
+                   :instance/disk 1
+                   :instance/cpu 1
+                   :instance/host [:node/name "cmp001"]}
+                  {:db/id -102
+                   :instance/name "vm3"
+                   :instance/memory 768
+                   :instance/disk 2
+                   :instance/cpu 2
+                   :instance/host [:node/name "cmp002"]}
+                  {:db/id -103
+                   :instance/name "vm4"
+                   :instance/memory 768
+                   :instance/disk 2
+                   :instance/cpu 2
+                   :instance/host [:node/name "cmp003"]}
+                  ])
 
 (def query (reagent/atom (str (pp '[:find
                                     ?node
@@ -207,62 +264,11 @@
 ;;                                     ]
 ;;                                   ))))
 
+(defn create-db [data]
+  (prn "create db" data)
+  (d/transact! conn data))
+
 (defn get-data []
-  (def schema {:node/name {:db/unique :db.unique/identity}})
-  (def conn (d/create-conn schema))
-  (def datoms [{:db/id -1
-                :node/name "cmp001"
-                :node/memory 7976
-                :node/memory_used 768
-                :node/disk 4
-                :node/disk_used 2
-                :node/cpu 4
-                :node/cpu_used 2
-                :cloud/name "devstack"}
-               {:db/id -2
-                :node/name "cmp002"
-                :node/memory 7976
-                :node/memory_used 768
-                :node/disk 4
-                :node/disk_used 2
-                :node/cpu 4
-                :node/cpu_used 2
-                :cloud/name "devstack"}
-               {:db/id -3
-                :node/name "cmp003"
-                :node/memory 7976
-                :node/memory_used 768
-                :node/disk 4
-                :node/disk_used 2
-                :node/cpu 4
-                :node/cpu_used 2
-                :cloud/name "devstack"}
-               {:db/id -100
-                :instance/name "vm1"
-                :instance/memory 384
-                :instance/disk 1
-                :instance/cpu 1
-                :instance/host [:node/name "cmp001"]}
-               {:db/id -101
-                :instance/name "vm2"
-                :instance/memory 384
-                :instance/disk 1
-                :instance/cpu 1
-                :instance/host [:node/name "cmp001"]}
-               {:db/id -102
-                :instance/name "vm3"
-                :instance/memory 768
-                :instance/disk 2
-                :instance/cpu 2
-                :instance/host [:node/name "cmp002"]}
-               {:db/id -103
-                :instance/name "vm4"
-                :instance/memory 768
-                :instance/disk 2
-                :instance/cpu 2
-                :instance/host [:node/name "cmp003"]}
-               ])
-  (d/transact! conn datoms)
   (try
     (def q (reader/read-string @query))
     {:columns (map (fn [x] (if (symbol? x) (subs (name x) 1) (str x))) (:find (normalize q)))
@@ -276,7 +282,7 @@
   )
 
 
-(defn import-data []
+(defn server-data []
   (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
             nodes (map first
                        (for [[cloud-name cloud] (:body response)]
@@ -439,4 +445,7 @@
     (fn [path]
       (boolean (reitit/match-by-path router path)))})
   (accountant/dispatch-current!)
+  (if USE-FAKE-DB
+    (create-db fake-datoms)
+    (create-db server-data))
   (mount-root))
