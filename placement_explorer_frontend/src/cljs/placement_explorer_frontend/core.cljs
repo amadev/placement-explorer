@@ -379,7 +379,7 @@
 (defn home-page []
   (fn []
     [:span.main
-     [:h1 "Welcome to Placement-Explorer"]
+     [:h1 "Placement-Explorer"]
      [:h2 "Query:"]
      [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
@@ -419,7 +419,12 @@
 
 (defn about-page []
   (fn [] [:span.main
-          [:h1 "About Placement-Explorer"]]))
+          [:h1 "Docs"]
+          [:ul
+           [:li [:a {:href "https://github.com/amadev/placement-explorer"} "Placement-Explorer schema and examples"]]
+           [:li [:a {:href "https://docs.datomic.com/on-prem/query/query.html#queries"} "Datalog queries"]]
+           [:li [:a {:href "http://www.learndatalogtoday.org"} "Learn Datalog Today"]]
+           ]]))
 
 
 ;; -------------------------
@@ -442,7 +447,7 @@
       [:div
        [:header
         [:p [:a {:href (path-for :index)} "Home"] " | "
-         [:a {:href (path-for :about)} "About Placement-Explorer"]]]
+         [:a {:href (path-for :about)} "Docs"]]]
        [page]
        [:footer {:style {:clear "both"}}
         [:p "Placement-Explorer ©"]]])))
