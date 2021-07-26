@@ -23,6 +23,8 @@
 
 (def DATA-URL "//localhost:5000/resource")
 (def USE-FAKE-DB true)
+(def BLOCK-SIZE-BASE 200)
+(def BLOCK-SIZE-VARIABLE 100)
 
 ;; --- utils
 
@@ -344,7 +346,7 @@
           [(fn [] (treemap
                    name
                    (treemap-data row)
-                   (+ 200 (* 100 K))))])]
+                   (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K))))])]
        )
      )
    ]
