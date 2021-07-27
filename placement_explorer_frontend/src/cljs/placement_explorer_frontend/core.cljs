@@ -95,21 +95,31 @@
      :series [{:type "treemap"
                :data data}]}}])
 
-(defn update-map [[i m]]
+(defn update-map [[i m] merge-value]
   (reduce-kv (fn [m k v]
-               (assoc m (if (clojure.string/includes? k "|")
-                          (clojure.string/replace k #"\|" (str (+ i 1))) k) v)) {} m))
+               (assoc m
+                      (let [replacement (if merge-value merge-value (str (+ i 1)))]
+                        (if (clojure.string/includes? k "|")
+                          (clojure.string/replace k #"\|" replacement) k)) v)) {} m))
 
-(defn merge-rows [rows]
-  (reduce merge (map #(update-map %) (map-indexed vector rows)))
+(defn merge-rows [rows merge-index]
+  (prn "merge-index" merge-index)
+  (reduce
+   merge
+   (map (fn [indexed-row] (update-map indexed-row (get (second indexed-row) merge-index))) (map-indexed vector rows)))
   )
 
 (defn merge-results [results]
   (let [title-index (filter #(string? (second %)) (map-indexed vector (first (:rows results))))
         rows (for [i (:rows results)] (zipmap (:columns results) i))
+        i (first (second title-index))
+        merge-index (if i (nth (:columns results) i))
         ]
     (if (not (empty? title-index))
-      (map (fn [[k v]] [k (merge-rows v)]) (group-by #(get % (nth (:columns results) (ffirst title-index))) rows)))
+      (map
+       (fn [[k v]] [k (merge-rows v merge-index)])
+       (group-by #(get % (nth (:columns results) (ffirst title-index))) rows))
+      )
     )
   )
 
@@ -392,7 +402,9 @@
           [:div {:id "table-container"} (table results)]
           [:h3 "Graph"]
           [:div {:id "graph-container"}
-           (show-graph results)]]
+           (try
+             (show-graph results)
+             (catch :default e [:h4 (str "Graph error" e)]))]]
          [:div
           [:h3 "Error"]
           [:pre (pp results)]]))
