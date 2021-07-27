@@ -46,7 +46,7 @@ setup(
     entry_points={
         "console_scripts": ["placement-explorer=placement_explorer.cli:main"]
     },
-    install_requires=["flask", "os-sdk-light"],
+    install_requires=["flask", "os-sdk-light>=0.2.7"],
     python_requires="~=3.8",
     author="Andrey Volkov",
     author_email="m@amadev.ru",
