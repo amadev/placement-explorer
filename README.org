@@ -6,28 +6,36 @@ Placement-Explorer is a tool to visualize state of available and used resources 
 
 To start exploring your OpenStack Placement you need:
 
-1) Configure your OpenStack client and check Placement accessible.
+- Configure your OpenStack client and check Placement accessible.
 
+#+BEGIN_SRC sh
 export OS_CLIENT_CONFIG_FILE=~/files/openrc/clouds.yaml
 export OS_CLOUD=devstack
 
 openstack resource provider list
+#+END_SRC
 
-2) Start Placement-Explorer.
+- Start Placement-Explorer.
 
+#+BEGIN_SRC sh
 docker run amadev/placement-explorer -p 5000:5000
+#+END_SRC
 
-3) Open your browser at http://localhost:5000
+- Open your browser at http://localhost:5000
 
 ** Development
 
 *** Backend
 
-tox -e py37
+#+BEGIN_SRC sh
+tox -e py38
 export FLASK_APP=placement_explorer.app
 .tox/py37/bin/flask run --reload
+#+END_SRC
 
 *** Frontend
 
+#+BEGIN_SRC sh
 cd placement_explorer_frontend
 lein figwheel
+#+END_SRC
