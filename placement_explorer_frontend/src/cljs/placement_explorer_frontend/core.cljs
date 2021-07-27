@@ -25,8 +25,13 @@
 (def USE-FAKE-DB true)
 (def BLOCK-SIZE-BASE 200)
 (def BLOCK-SIZE-VARIABLE 100)
+(def DEBUG true)
 
 ;; --- utils
+
+(defn debug [& objs]
+  (if DEBUG
+    (prn (clojure.string/join " " objs))))
 
 (defn pp [obj]
   (with-out-str (cljs.pprint/pprint obj)))
@@ -103,7 +108,7 @@
                           (clojure.string/replace k #"\|" replacement) k)) v)) {} m))
 
 (defn merge-rows [rows merge-index]
-  (prn "merge-index" merge-index)
+  (debug "merge-index" merge-index)
   (reduce
    merge
    (map (fn [indexed-row] (update-map indexed-row (get (second indexed-row) merge-index))) (map-indexed vector rows)))
@@ -331,7 +336,7 @@
                                     )))
               ]
           (let [loaded-datoms (concat nodes instances)]
-            (prn "Got data from server" loaded-datoms)
+            (debug "Got data from server" loaded-datoms)
             (reset! datoms loaded-datoms))
           )
         ))
@@ -378,7 +383,7 @@
        [:div {:style {:float "left"}}
         (let [K (/ (reduce + (filter (fn [y] (number? y)) (vals row))) max-sum)
               ]
-          (prn "treemap" name (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
+          (debug "treemap" name (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
           [(fn [] (treemap
                    name
                    (treemap-data row)
