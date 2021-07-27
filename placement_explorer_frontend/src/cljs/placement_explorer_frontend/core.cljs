@@ -70,7 +70,7 @@
     (for [item root]
       (let [s (reduce + (map (fn [v] (:value v)) (:children item)))]
         (if (not= (:value item) s)
-          (assoc item :children (conj (:children item) {:name (str (:name item) " ") :value (- (:value item) s)})))))))
+          (assoc item :children (conj (:children item) {:name (str (:name item) "-free") :value (- (:value item) s)})))))))
 
 (defn treemap-title [row columns]
   (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
@@ -91,6 +91,7 @@
     :theme "dark"
     :option
     {:title {:text title}
+     :tooltip {:formatter (fn [info] (str "name: " (clojure.string/join "/" (map #(.-name %) (.-treePathInfo info))) "<br/>value: " (.-value info)))}
      :series [{:type "treemap"
                :data data}]}}])
 
@@ -197,7 +198,8 @@
                                     [?i :instance/name ?instance|]
                                     [?i :instance/memory ?mem-used-|]
                                     [?i :instance/disk ?disk-used-|]
-                                    [?i :instance/cpu ?cpu-used-|]
+                                    [?i :instance/cpu ?ic]
+                                    [(* 1000 ?ic) ?cpu-used-|]
                                     ]
                                   ))))
 
