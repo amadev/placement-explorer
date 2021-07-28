@@ -15,10 +15,10 @@ export OS_CLOUD=devstack
 openstack resource provider list
 #+END_SRC
 
-- Start Placement-Explorer.
+- Start Placement-Explorer (not implemented yet, see Development)
 
 #+BEGIN_SRC sh
-docker run amadev/placement-explorer -p 5000:5000
+docker run quay.io/amadev/placement-explorer -p 5000:5000
 #+END_SRC
 
 - Open your browser at http://localhost:5000
@@ -121,7 +121,7 @@ Full representatiton:
 
 #+BEGIN_SRC text
 [:find
- ?node
+ ?node_sn
  ?cpu
  ?cpu-used
  ?mem
@@ -135,6 +135,9 @@ Full representatiton:
  :where
  [?i :instance/host ?n]
  [?n :node/name ?node]
+ [(subs ?node 3 6) ?node_num]
+ [(subs ?node 0 6) ?node_sn]
+ [(< ?node_num "005")]
  [?n :node/memory ?mem]
  [?n :node/memory_used ?mem-used]
  [?n :node/disk ?disk]
@@ -148,14 +151,27 @@ Full representatiton:
  [?i :instance/disk ?disk-used-|]
  [?i :instance/cpu ?ic]
  [(* 10e9 ?ic) ?cpu-used-|]
- [(subs ?node 3 6) ?node_num]
- [(< ?node_num "005")]
  ]
 #+END_SRC
 
 ** Development
 
 *** Backend
+
+To explore existing placement instance set env for OpenStack client:
+
+#+BEGIN_SRC sh
+export OS_CLIENT_CONFIG_FILE=~/files/openrc/clouds.yaml
+export OS_CLOUD=devstack
+#+END_SRC
+
+To play with some fake data use:
+
+#+BEGIN_SRC sh
+export PLACEMENT_EXPLORER_USE_FAKE_DATA=fake-data.json
+#+END_SRC
+
+Then start server:
 
 #+BEGIN_SRC sh
 tox -e py38
