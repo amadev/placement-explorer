@@ -193,107 +193,20 @@
                   ])
 
 (def query (reagent/atom (str (pp '[:find
+                                    ?cloud
+                                    (sum ?mem)
+                                    (sum ?disk)
+                                    (sum ?cpu)
+                                    :with
                                     ?node
-                                    ?cpu
-                                    ?cpu-used
-                                    ?mem
-                                    ?mem-used
-                                    ?disk
-                                    ?disk-used
-                                    ?instance|
-                                    ?mem-used-|
-                                    ?disk-used-|
-                                    ?cpu-used-|
                                     :where
-                                    [?i :instance/host ?n]
-                                    [?n :node/name ?node]
+                                    [?n :cloud/name ?cloud]
                                     [?n :node/memory ?mem]
-                                    [?n :node/memory_used ?mem-used]
                                     [?n :node/disk ?disk]
-                                    [?n :node/disk_used ?disk-used]
-                                    [?n :node/cpu ?c]
-                                    [?n :node/cpu_used ?cu]
-                                    [(* 1000 ?c) ?cpu]
-                                    [(* 1000 ?cu) ?cpu-used]
-                                    [?i :instance/name ?instance|]
-                                    [?i :instance/memory ?mem-used-|]
-                                    [?i :instance/disk ?disk-used-|]
-                                    [?i :instance/cpu ?ic]
-                                    [(* 1000 ?ic) ?cpu-used-|]
+                                    [?n :node/cpu ?cpu]
+                                    [?n :node/name ?node]
                                     ]
                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     ?node
-;;                                     ?memory
-;;                                     ?disk
-;;                                     ?cpu
-;;                                     :where
-;;                                     [?n :node/name ?node]
-;;                                     [?n :node/memory ?memory]
-;;                                     [?n :node/disk ?disk]
-;;                                     [?n :node/cpu ?cpu]
-;;                                     ]
-;;                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     ?name
-;;                                     ?memory
-;;                                     :where
-;;                                     [?i :instance/name ?name]
-;;                                     [?i :instance/memory ?memory]
-;;                                     ]
-;;                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     (count ?node)
-;;                                     :where
-;;                                     [_ :node/name ?node]
-;;                                     ]
-;;                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     ?name
-;;                                     ?memory
-;;                                     ?memory-sys
-;;                                     ?memory-app
-;;                                     ?disk_mb
-;;                                     :where
-;;                                     [?i :instance/name ?name]
-;;                                     [?i :instance/memory ?memory]
-;;                                     [?i :instance/disk ?disk]
-;;                                     [(* 1024 ?disk) ?disk_mb]
-;;                                     [(* 0.2 ?memory) ?memory-sys]
-;;                                     [(* 0.8 ?memory) ?memory-app]
-;;                                     ]
-;;                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     ?node
-;;                                     ?disk
-;;                                     :where
-;;                                     [?n :node/name ?node]
-;;                                     [?n :node/disk ?disk]
-;;                                     [(subs ?node 3) ?node_num]
-;;                                     [(< ?node_num "003")]
-;;                                     ]
-;;                                   ))))
-
-;; (def query (reagent/atom (str (pp '[:find
-;;                                     ?cloud
-;;                                     (sum ?mem)
-;;                                     (sum ?disk)
-;;                                     (sum ?cpu)
-;;                                     :with
-;;                                     ?node
-;;                                     :where
-;;                                     [?n :cloud/name ?cloud]
-;;                                     [?n :node/memory ?mem]
-;;                                     [?n :node/disk ?disk]
-;;                                     [?n :node/cpu ?cpu]
-;;                                     [?n :node/name ?node]
-;;                                     ]
-;;                                   ))))
 
 (defn query-data []
   (let [conn (d/create-conn schema)]

@@ -23,6 +23,135 @@ docker run amadev/placement-explorer -p 5000:5000
 
 - Open your browser at http://localhost:5000
 
+** Query Examples
+
+Cloud summary:
+
+#+BEGIN_SRC text
+[:find
+ ?cloud
+ (sum ?mem)
+ (sum ?disk)
+ (sum ?cpu)
+ :with
+ ?node
+ :where
+ [?n :cloud/name ?cloud]
+ [?n :node/memory ?mem]
+ [?n :node/disk ?disk]
+ [?n :node/cpu ?cpu]
+ [?n :node/name ?node]
+ ]
+#+END_SRC
+
+Count of nodes:
+
+#+BEGIN_SRC text
+[:find
+ (count ?node)
+ :where
+ [_ :node/name ?node]
+ ]
+#+END_SRC
+
+Count of instances:
+
+#+BEGIN_SRC text
+[:find
+ (count ?name)
+ :where
+ [_ :instance/name ?name]
+ ]
+#+END_SRC
+
+Filter node buy index:
+
+#+BEGIN_SRC text
+[:find
+ ?node
+ ?node_num
+ ?disk
+ :where
+ [?n :node/name ?node]
+ [?n :node/disk ?disk]
+ [(subs ?node 3 6) ?node_num]
+ [(< ?node_num "010")]
+ ]
+#+END_SRC
+
+Simple hierarchy:
+
+#+BEGIN_SRC text
+[:find
+ ?name
+ ?memory
+ ?memory-sys
+ ?memory-app
+ :where
+ [?i :instance/name ?name]
+ [?i :instance/memory ?memory]
+ [?i :instance/disk ?disk]
+ [(* 1024 ?disk) ?disk_mb]
+ [(* 0.2 ?memory) ?memory-sys]
+ [(* 0.8 ?memory) ?memory-app]
+ [(> ?memory 30e9)]
+ ]
+#+END_SRC
+
+Node representation:
+
+#+BEGIN_SRC text
+[:find
+ ?node
+ ?memory
+ ?disk
+ ?cpu
+ :where
+ [?n :node/name ?node]
+ [?n :node/memory ?memory]
+ [?n :node/disk ?disk]
+ [?n :node/cpu ?c]
+ [(* 1e9 ?c) ?cpu]
+ [(subs ?node 3 6) ?node_num]
+ [(< ?node_num "010")]
+ ]
+#+END_SRC
+
+Full representatiton:
+
+#+BEGIN_SRC text
+[:find
+ ?node
+ ?cpu
+ ?cpu-used
+ ?mem
+ ?mem-used
+ ?disk
+ ?disk-used
+ ?instance|
+ ?mem-used-|
+ ?disk-used-|
+ ?cpu-used-|
+ :where
+ [?i :instance/host ?n]
+ [?n :node/name ?node]
+ [(= ?node "cmp001")]
+ [?n :node/memory ?mem]
+ [?n :node/memory_used ?mem-used]
+ [?n :node/disk ?disk]
+ [?n :node/disk_used ?disk-used]
+ [?n :node/cpu ?c]
+ [?n :node/cpu_used ?cu]
+ [(* 1000 ?c) ?cpu]
+ [(* 1000 ?cu) ?cpu-used]
+ [?i :instance/name ?instance|]
+ [?i :instance/memory ?mem-used-|]
+ [?i :instance/disk ?disk-used-|]
+ [?i :instance/cpu ?ic]
+ [(* 1000 ?ic) ?cpu-used-|]
+ ]
+#+END_SRC
+
 ** Development
 
 *** Backend
@@ -30,7 +159,7 @@ docker run amadev/placement-explorer -p 5000:5000
 #+BEGIN_SRC sh
 tox -e py38
 export FLASK_APP=placement_explorer.app
-.tox/py37/bin/flask run --reload
+.tox/py38/bin/flask run --reload
 #+END_SRC
 
 *** Frontend
