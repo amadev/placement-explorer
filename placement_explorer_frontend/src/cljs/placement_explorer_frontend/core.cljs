@@ -316,34 +316,34 @@
   )
 
 (defn set-instance-resource [m k v]
-  (assoc m (keyword (str "instance/" (name k))) v)
+  (let [[k v] (resource-mapping k v)]
+   (assoc m (keyword (str "instance/" (name k))) v))
   )
 
 (defn import-server-data []
   (let [out (chan)]
     (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
-              nodes (first
-                     (for [[cloud-name cloud] (:body response)]
-                       (for [[node-name node] (:nodes cloud)]
-                         (merge
-                          {:cloud/name (name cloud-name)
-                           :node/name (name node-name)
-                           :db/id (name node-name)}
-                          (reduce-kv set-resource {} (:resources node))
-                          )
-                         )
-                       ))
-              instances (ffirst (for [[cloud-name cloud] (:body response)]
-                                  (for [[node-name node] (:nodes cloud)]
-                                    (for [[instance-uuid resources] (:instances node)]
+              nodes (apply concat (for [[cloud-name cloud] (:body response)]
+                                    (for [[node-name node] (take 10 (:nodes cloud))]
                                       (merge
-                                       {:db/id (name instance-uuid)
-                                        :instance/name (name instance-uuid)
-                                        :instance/host [:node/name (name node-name)]
-                                        }
-                                       (reduce-kv set-instance-resource {} resources)
-                                       ))
-                                    )))
+                                       {:cloud/name (name cloud-name)
+                                        :node/name (name node-name)
+                                        :db/id (name node-name)}
+                                       (reduce-kv set-resource {} (:resources node))
+                                       )
+                                      )
+                                    ))
+              instances (apply concat (apply concat (for [[cloud-name cloud] (:body response)]
+                                                      (for [[node-name node] (take 10 (:nodes cloud))]
+                                                        (for [[instance-uuid resources] (:instances node)]
+                                                          (merge
+                                                           {:db/id (name instance-uuid)
+                                                            :instance/name (name instance-uuid)
+                                                            :instance/host [:node/name (name node-name)]
+                                                            }
+                                                           (reduce-kv set-instance-resource {} resources)
+                                                           ))
+                                                        ))))
               ]
           (let [loaded-datoms (concat nodes instances)]
             (debug "Got data from server" loaded-datoms)
