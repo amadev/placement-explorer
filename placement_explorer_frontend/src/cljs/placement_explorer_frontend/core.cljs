@@ -27,6 +27,7 @@
 (def USE-FAKE-DB false)
 (def BLOCK-SIZE-BASE 200)
 (def BLOCK-SIZE-VARIABLE 100)
+(def HIERARCHY-DELIMITER "-")
 (def DEBUG false)
 
 ;; --- utils
@@ -57,18 +58,18 @@
 (defn build-children [root data level]
   (if (empty? root)
     root
-   (for [item root]
-     (let [children (filter
-                     (fn [[k v]] (and
-                                  (number? v)
-                                  (clojure.string/starts-with? k (:name item))
-                                  (not= k (:name item))
-                                  (= level (count (re-seq #"-" k)))))
-                     data)
-           new-root (for [[k v] children] {:name k :value v})]
-       (assoc item :children (build-children new-root data (+ 1 level)))
-       )
-     ))
+    (for [item root]
+      (let [children (filter
+                      (fn [[k v]] (and
+                                   (number? v)
+                                   (clojure.string/starts-with? k (:name item))
+                                   (not= k (:name item))
+                                   (= level (count (re-seq (re-pattern HIERARCHY-DELIMITER) k)))))
+                      data)
+            new-root (for [[k v] children] {:name k :value v})]
+        (assoc item :children (build-children new-root data (+ 1 level)))
+        )
+      ))
   )
 
 (defn treemap-add-available [root]
@@ -76,7 +77,6 @@
     root
     (for [item root]
       (let [s (reduce + (map (fn [v] (:value v)) (:children item)))]
-        (debug "parent" (:value item) "children" s)
         (if (> (:value item) s)
           (assoc item :children (conj (:children item) {:name (str (:name item) "-free") :value (- (:value item) s)}))
           item)))))
@@ -88,13 +88,8 @@
   )
 
 (defn treemap-data [row]
-  (let [top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) row)
+  (let [top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k HIERARCHY-DELIMITER)))) row)
         ]
-    (debug
-     "treemap-data"
-     "top-level" top-level
-     "build-children" (build-children (for [[k v] top-level] {:name k :value v}) row 1)
-     "treemap-add-available" (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) row 1)))
     (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) row 1))
     )
   )
@@ -123,7 +118,14 @@
   (debug "merge-index" merge-index)
   (reduce
    merge
-   (map (fn [indexed-row] (update-map indexed-row (get (second indexed-row) merge-index))) (map-indexed vector rows)))
+   (map
+    (fn [indexed-row] (update-map
+                       indexed-row
+                       (clojure.string/replace
+                        (or (get (second indexed-row) merge-index) "")
+                        (re-pattern HIERARCHY-DELIMITER)
+                        "")))
+    (map-indexed vector rows)))
   )
 
 (defn merge-results [results]
