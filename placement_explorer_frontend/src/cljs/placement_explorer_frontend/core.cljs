@@ -304,10 +304,15 @@
        :rows (d/q q @conn)}
       (catch :default e e))))
 
+(defn resource-mapping [k v]
+  (let [v (if (contains? #{:disk :memory} k) (* 1024 1024 v) v)]
+    [k v]))
 
 (defn set-resource [m k v]
-  (assoc (assoc m (keyword (str "node/" (name k))) (:total v))
-         (keyword (str "node/" (name k) "_used")) (:used v))
+  (let [[k v-total] (resource-mapping k (:total v))
+        [k v-used] (resource-mapping k (:used v))]
+   (assoc (assoc m (keyword (str "node/" (name k))) v-total)
+          (keyword (str "node/" (name k) "_used")) v-used))
   )
 
 (defn set-instance-resource [m k v]
