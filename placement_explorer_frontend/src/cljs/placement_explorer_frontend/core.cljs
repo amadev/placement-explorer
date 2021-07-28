@@ -332,7 +332,7 @@
     [:span.main
      [:h1 "Placement-Explorer"]
      [:h2 "Query:"]
-     [:textarea {:style {:width 600 :height 300} :on-change #(reset! query (-> % .-target .-value))} @query]
+     [:textarea {:style {:width 600 :height 300} :on-blur #(reset! query (-> % .-target .-value))} @query]
      [:h2 "Results:"]
      (let [results (query-data)]
        (if (contains? results :rows)
