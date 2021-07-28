@@ -110,7 +110,7 @@
 (defn update-map [[i m] merge-value]
   (reduce-kv (fn [m k v]
                (assoc m
-                      (let [replacement (if merge-value merge-value (str (+ i 1)))]
+                      (let [replacement (if (not (empty? merge-value)) merge-value (str (+ i 1)))]
                         (if (clojure.string/includes? k "|")
                           (clojure.string/replace k #"\|" replacement) k)) v)) {} m))
 
