@@ -383,9 +383,10 @@
    ;; TODO: calculate row sum for top level only
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
+         max-size (+ BLOCK-SIZE-BASE BLOCK-SIZE-VARIABLE)
          ]
      (for [[name row] (merge-results results)]
-       [:div {:style {:float "left"}}
+       [:div {:style {:float "left" :height max-size :width max-size}}
         (let [K (/ (reduce + (filter (fn [y] (number? y)) (vals row))) max-sum)
               ]
           (debug "treemap" name (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
