@@ -24,6 +24,7 @@
                  [datomic-query-helpers "0.1.1"]
                  [cljsjs/echarts "4.8.0-0"]
                  [cljs-http "0.1.46"]
+                 [clojure-humanize "0.2.2"]
                  ]
 
   :jvm-opts ["-Xmx1G"]

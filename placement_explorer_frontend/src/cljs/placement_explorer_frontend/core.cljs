@@ -13,7 +13,9 @@
    [cljs.pprint]
    [react :as react]
    [cljs.core.async :refer [<!, chan]]
-   [cljs-http.client :as http])
+   [cljs-http.client :as http]
+   [clojure.contrib.humanize :as human]
+   )
   (:require-macros
    [cljs.core.async.macros :refer [go]])
   )
@@ -96,7 +98,10 @@
     :theme "dark"
     :option
     {:title {:text title}
-     :tooltip {:formatter (fn [info] (str "name: " (clojure.string/join "/" (map #(.-name %) (.-treePathInfo info))) "<br/>value: " (.-value info)))}
+     :tooltip {:formatter (fn [info]
+                            (str "name: "
+                                 (clojure.string/join "/" (map #(.-name %) (.-treePathInfo info)))
+                                 "<br/>value: "    (human/filesize (.-value info) :binary false)))}
      :series [{:type "treemap"
                :data data}]}}])
 
