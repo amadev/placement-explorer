@@ -21,7 +21,9 @@ def home():
     <link href="/static/site.min.css" rel="stylesheet" type="text/css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="body-container" style="margin: 0 auto; max-width: 1600px; padding-top: 72px;">
+      <div id="app"></div>
+    </div>
     <script src="/static/app.js"></script>
   </body>
 </html>
