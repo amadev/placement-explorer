@@ -24,10 +24,10 @@
 ;; --- config
 
 (def DATA-URL "//localhost:5000/resource")
-(def USE-FAKE-DB true)
+(def USE-FAKE-DB false)
 (def BLOCK-SIZE-BASE 200)
 (def BLOCK-SIZE-VARIABLE 100)
-(def DEBUG true)
+(def DEBUG false)
 
 ;; --- utils
 
@@ -76,8 +76,10 @@
     root
     (for [item root]
       (let [s (reduce + (map (fn [v] (:value v)) (:children item)))]
-        (if (not= (:value item) s)
-          (assoc item :children (conj (:children item) {:name (str (:name item) "-free") :value (- (:value item) s)})))))))
+        (debug "parent" (:value item) "children" s)
+        (if (> (:value item) s)
+          (assoc item :children (conj (:children item) {:name (str (:name item) "-free") :value (- (:value item) s)}))
+          item)))))
 
 (defn treemap-title [row columns]
   (let [sorted (for [[i v] (map-indexed vector columns)] [v (nth row i)])
@@ -88,6 +90,11 @@
 (defn treemap-data [row]
   (let [top-level (filter (fn [[k v]] (and (number? v) (not (clojure.string/includes? k "-")))) row)
         ]
+    (debug
+     "treemap-data"
+     "top-level" top-level
+     "build-children" (build-children (for [[k v] top-level] {:name k :value v}) row 1)
+     "treemap-add-available" (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) row 1)))
     (treemap-add-available (build-children (for [[k v] top-level] {:name k :value v}) row 1))
     )
   )
@@ -302,12 +309,13 @@
    (let [row-sums (map (fn [x] (reduce + (filter (fn [y] (number? y)) x))) (:rows results))
          max-sum (reduce max row-sums)
          max-size (+ BLOCK-SIZE-BASE BLOCK-SIZE-VARIABLE)
+         merged (merge-results results)
          ]
-     (for [[name row] (merge-results results)]
+     (for [[name row] merged]
        [:div {:style {:float "left" :height max-size :width max-size}}
         (let [K (/ (reduce + (filter (fn [y] (number? y)) (vals row))) max-sum)
               ]
-          (debug "treemap" name (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
+          (debug "treemap" name row (treemap-data row) (+ BLOCK-SIZE-BASE (* BLOCK-SIZE-VARIABLE K)))
           [(fn [] (treemap
                    name
                    (treemap-data row)
