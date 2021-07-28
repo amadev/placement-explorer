@@ -246,7 +246,7 @@
   (let [out (chan)]
     (go (let [response (<! (http/get DATA-URL {:with-credentials? false :keywordize-keys? false}))
               nodes (apply concat (for [[cloud-name cloud] (:body response)]
-                                    (for [[node-name node] (take 10 (:nodes cloud))]
+                                    (for [[node-name node] (:nodes cloud)]
                                       (merge
                                        {:cloud/name (name cloud-name)
                                         :node/name (name node-name)
@@ -256,7 +256,7 @@
                                       )
                                     ))
               instances (apply concat (apply concat (for [[cloud-name cloud] (:body response)]
-                                                      (for [[node-name node] (take 10 (:nodes cloud))]
+                                                      (for [[node-name node] (:nodes cloud)]
                                                         (for [[instance-uuid resources] (:instances node)]
                                                           (merge
                                                            {:db/id (name instance-uuid)
