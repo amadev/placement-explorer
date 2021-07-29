@@ -15,10 +15,15 @@ export OS_CLOUD=devstack
 openstack resource provider list
 #+END_SRC
 
-- Start Placement-Explorer (not implemented yet, see Development)
+- Start Placement-Explorer
 
 #+BEGIN_SRC sh
-docker run quay.io/amadev/placement-explorer -p 5000:5000
+docker run -d \
+  --network host \
+  --mount type=bind,source=$OS_CLIENT_CONFIG_FILE,target=/app/clouds.yaml \
+  -e OS_CLIENT_CONFIG_FILE=/app/clouds.yaml \
+  -e OS_CLOUD=$OS_CLOUD \
+  --name placement-explorer quay.io/amadev/placement-explorer
 #+END_SRC
 
 - Open your browser at http://localhost:5000
