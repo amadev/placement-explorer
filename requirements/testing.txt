@@ -20,7 +20,7 @@ ipython==7.25.0
     # via ipdb
 ipython-genutils==0.2.0
     # via traitlets
-isort==5.9.2
+isort==5.9.3
     # via pylint
 jedi==0.18.0
     # via ipython
@@ -48,7 +48,7 @@ py==1.10.0
     # via pytest
 pygments==2.9.0
     # via ipython
-pylint==2.9.5
+pylint==2.9.6
     # via -r requirements/testing.in
 pyparsing==2.4.7
     # via packaging
